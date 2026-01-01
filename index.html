@@ -234,8 +234,8 @@ function renderLogs() {
         <strong>${e.date}</strong><br>
         気分：${e.mood || "-"}<br>
         感情：${e.emotions.join("、")}<br>
-        必要：${e.needs.join("、")}<br>
-        📝 ${e.memo || ""}
+        対応：${e.needs.join("、")}<br>
+        📝 ${(e.memo || "").replace(/\n/g, "<br>")}
         <br><br>
         <button onclick="startEdit(${realIndex})">修正</button>
         <button onclick="deleteLog(${realIndex})">削除</button>
