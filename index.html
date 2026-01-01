@@ -42,40 +42,41 @@
     /* スマホ向け調整 */
 @media (max-width: 600px) {
   body {
-    font-size: 20px;
+    font-size: 17px;
   }
 
   h1 {
-    font-size: 26px;
-  }
-
-  h2 {
     font-size: 22px;
   }
 
-  section strong {
+  h2 {
     font-size: 20px;
   }
 
+  section strong {
+    font-size: 18px;
+  }
+
   label {
-    font-size: 20px;
-    line-height: 2;
+    font-size: 18px;
+    line-height: 1.8;
     display: block;
   }
 
   textarea {
-    font-size: 18px;
+    font-size: 17px;
   }
 
   button {
-    font-size: 20px;
-    padding: 16px 20px;
+    font-size: 18px;
+    padding: 14px 16px;
   }
 
   .log {
-    font-size: 18px;
+    font-size: 16px;
   }
 }
+
 
 input[type="radio"],
 input[type="checkbox"] {
@@ -173,6 +174,8 @@ input[type="checkbox"] {
 <div id="logList"></div>
 
 <script>
+  let editingIndex = null;
+
   const today = new Date();
   document.getElementById("today").textContent =
     "📅 " + today.toLocaleDateString();
@@ -212,28 +215,37 @@ function renderLogs() {
 
   if (data.length === 0) return;
 
-  // 最新ログをダッシュボードに反映
-  const latest = data[data.length - 1];
-  document.getElementById("todayWake"); // 触らない（安全用）
-
   data.slice().reverse().forEach((e, i) => {
     const realIndex = data.length - 1 - i;
-
     const div = document.createElement("div");
     div.className = "log";
-    div.innerHTML = `
-      <strong>${e.date}</strong><br>
-      機嫌：${e.mood || "-"}<br>
-      感情：${e.emotions.join("、")}<br>
-      必要：${e.needs.join("、")}<br>
-      📝 ${e.memo || ""}
-      <br><br>
-      <button onclick="editLog(${realIndex})">修正</button>
-      <button onclick="deleteLog(${realIndex})">削除</button>
-    `;
+
+    if (editingIndex === realIndex) {
+      div.innerHTML = `
+        <strong>${e.date}</strong><br>
+        📝 編集中<br>
+        <textarea id="editMemo" style="width:100%;min-height:100px;">${e.memo || ""}</textarea>
+        <br>
+        <button onclick="saveEdit(${realIndex})">保存</button>
+        <button onclick="cancelEdit()">キャンセル</button>
+      `;
+    } else {
+      div.innerHTML = `
+        <strong>${e.date}</strong><br>
+        気分：${e.mood || "-"}<br>
+        感情：${e.emotions.join("、")}<br>
+        必要：${e.needs.join("、")}<br>
+        📝 ${e.memo || ""}
+        <br><br>
+        <button onclick="startEdit(${realIndex})">修正</button>
+        <button onclick="deleteLog(${realIndex})">削除</button>
+      `;
+    }
+
     list.appendChild(div);
   });
 }
+
 
 
   renderLogs();
@@ -257,6 +269,26 @@ function deleteLog(index) {
   data.splice(index, 1);
   localStorage.setItem("manualLogs", JSON.stringify(data));
   renderLogs();
+  function startEdit(index) {
+  editingIndex = index;
+  renderLogs();
+}
+
+function cancelEdit() {
+  editingIndex = null;
+  renderLogs();
+}
+
+function saveEdit(index) {
+  const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
+  const textarea = document.getElementById("editMemo");
+  data[index].memo = textarea.value;
+
+  localStorage.setItem("manualLogs", JSON.stringify(data));
+  editingIndex = null;
+  renderLogs();
+}
+
 }
 
 </script>
