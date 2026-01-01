@@ -1,62 +1,66 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>🎯 2026年の指針</title>
 
-  <title>🎯 2026年の指針</title>
+<link rel="icon" href="icon.png">
+<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 
-  <link rel="icon" href="icon.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<style>
+body {
+  font-family: sans-serif;
+  background: #f7f7f7;
+  padding: 20px;
+  line-height: 1.7;
+}
+nav a { margin-right: 10px; }
+section {
+  background: #fff;
+  padding: 16px;
+  border-radius: 10px;
+  margin-bottom: 16px;
+}
+details {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 16px;
+}
+summary { font-weight: bold; cursor: pointer; }
 
-  <style>
-    body {
-      font-family: sans-serif;
-      background: #f7f7f7;
-      padding: 20px;
-      line-height: 1.7;
-    }
+.goal-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  background: #fafafa;
+}
+.goal-card strong { display:block; margin-bottom:6px; }
 
-    nav a {
-      margin-right: 10px;
-    }
+.goal-card textarea,
+.goal-card select,
+.goal-card input[type="date"] {
+  width:100%;
+  margin-top:4px;
+  padding:6px;
+  font-size:14px;
+}
 
-    h1 {
-      margin-top: 10px;
-    }
+.month-highlight textarea {
+  width:100%;
+  min-height:60px;
+  margin-top:6px;
+}
 
-    section {
-      background: white;
-      padding: 16px;
-      margin-bottom: 16px;
-      border-radius: 8px;
-    }
-
-    ul {
-      padding-left: 20px;
-    }
-
-    li {
-      margin-bottom: 6px;
-    }
-
-    .theme {
-      font-size: 18px;
-      font-weight: bold;
-      margin-bottom: 8px;
-    }
-
-    .note {
-      font-size: 14px;
-      color: #666;
-      margin-top: 8px;
-    }
-  </style>
+.note { font-size:14px; color:#666; }
+</style>
 </head>
 
 <body>
 
-<nav style="margin-bottom:20px;">
+<nav>
   <a href="wake.html">🌅 Wake</a> |
   <a href="index.html">📝 Log</a> |
   <a href="goals2026.html">🎯 2026</a>
@@ -65,82 +69,183 @@
 <h1>🎯 2026年の指針</h1>
 
 <section>
-  <div class="theme">2026年のテーマ</div>
+  <strong>2026年のテーマ</strong><br>
   整える・積み上げる・表現する
 </section>
 
-<section>
-  <h2>🍽 生活・コンディション（判断を減らす）</h2>
-  <ul>
-    <li>1年間ビールは飲まない</li>
-    <li>1年間パスタは食べない</li>
-    <li>迷ったら「納豆ご飯＋味噌汁」</li>
-    <li>寒くなったら体を動かす</li>
-  </ul>
+<section class="note">
+  ここは進捗を測る場所ではない。<br>
+  意識を戻すための場所。
 </section>
 
+<!-- 🌕 月間ハイライト -->
 <section>
-  <h2>💪 体・健康（戻る場所を決める）</h2>
-  <ul>
-    <li>ベストコンディション体型は48kg</li>
-    <li>汗をかく（歩く／筋トレ／湯船でOK）</li>
-    <li>脚を組まない（姿勢を整える）</li>
-    <li>無理な追い込みはしない</li>
-    <li>フェイスパックを習慣化</li>
-    <li>早起き</li>
-  </ul>
+  <h2>🌕 月間ハイライト</h2>
+  <div id="monthlyHighlights"></div>
 </section>
 
-<section>
-  <h2>💰 お金・仕事（長期視点）</h2>
-  <ul>
-    <li>資産400万円を目指す</li>
-    <li>副業で年間5万円の売り上げをつくる</li>
-    <li>AIを使ってお金を稼ぐ経験をする</li>
-    <li>個別株投資で資産形成を学ぶ</li>
-    <li>FP2級合格</li>
-  </ul>
-</section>
+<h2>🗂 目標カード（最近触った順）</h2>
+<div id="goalContainer"></div>
 
-<section>
-  <h2>📚 学び・成長（積み上げ型）</h2>
-  <ul>
-    <li>年間読書50冊</li>
-    <li>読書通帳をアプリで作る</li>
-    <li>ニュースチェックを習慣化</li>
-    <li>メモを取る（アイデア・考え・気づき）</li>
-    <li>記憶力を高める</li>
-    <li>TOEIC700点</li>
-    <li>英語で道案内できるようになる</li>
-  </ul>
-</section>
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<section>
-  <h2>✍️ 表現・記録（Me Manuelの核）</h2>
-  <ul>
-    <li>日記や記録を習慣化</li>
-    <li>SNSやnote発信をものにする</li>
-    <li>自分の取説をつくる（Me Manuelそのもの）</li>
-    <li>自分の機嫌を自分で取れるようになる</li>
-    <li>趣味嗜好・特技・好きなものをすぐ言えるようになる</li>
-  </ul>
-</section>
+<script>
+/* ===============================
+   Firebase 初期化（既存流用）
+================================ */
+// firebaseConfig は index / wake と同じものを使用
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
 
-<section>
-  <h2>🤝 人・つながり</h2>
-  <ul>
-    <li>趣味の友達をつくる</li>
-  </ul>
-</section>
+/* ===============================
+   👤 ユーザーID（固定）
+================================ */
+const userId = "me-manuel-main-user";
 
-<section>
-  <div class="note">
-    ここは、進捗を測る場所ではない。<br>
-    自分の姿勢や大事にしたいことを、<br>
-    何度も思い出すための場所。<br>
-    できない時期があっても、それでいい。
-  </div>
-</section>
+/* ===============================
+   🎯 目標定義（全項目）
+================================ */
+const goals = [
+  // 生活
+  {id:"beer", title:"1年間ビール禁止", group:"🍽 生活"},
+  {id:"pasta", title:"1年間パスタ禁止", group:"🍽 生活"},
+  {id:"natto", title:"迷ったら納豆ご飯＋味噌汁", group:"🍽 生活"},
+  {id:"cold_move", title:"寒くなったら体を動かす", group:"🍽 生活"},
+
+  // 健康
+  {id:"weight", title:"ベストコンディション体型48kg", group:"💪 健康"},
+  {id:"no_cross", title:"脚を組まない", group:"💪 健康"},
+  {id:"sweat", title:"汗をかく（歩く/筋トレ/湯船）", group:"💪 健康"},
+  {id:"facepack", title:"フェイスパックを習慣化", group:"💪 健康"},
+  {id:"early", title:"早起き", group:"💪 健康"},
+
+  // お金
+  {id:"asset", title:"資産400万円", group:"💰 お金"},
+  {id:"side", title:"副業で年間5万円", group:"💰 お金"},
+  {id:"ai", title:"AIでお金を稼ぐ", group:"💰 お金"},
+  {id:"stock", title:"個別株投資を始める", group:"💰 お金"},
+  {id:"fp", title:"FP2級合格", group:"💰 お金"},
+
+  // 学び
+  {id:"read50", title:"年間読書50冊", group:"📚 学び"},
+  {id:"reader_app", title:"読書通帳アプリを作る", group:"📚 学び"},
+  {id:"news", title:"ニュースチェック習慣化", group:"📚 学び"},
+  {id:"memo", title:"メモを取る習慣", group:"📚 学び"},
+  {id:"memory", title:"記憶力を高める", group:"📚 学び"},
+  {id:"toeic", title:"TOEIC700点", group:"📚 学び"},
+  {id:"english", title:"英語で道案内できる", group:"📚 学び"},
+
+  // 表現
+  {id:"diary", title:"日記・記録を習慣化", group:"✍️ 表現"},
+  {id:"sns", title:"SNS/note発信をものにする", group:"✍️ 表現"},
+  {id:"manual", title:"自分の取説を作る", group:"✍️ 表現"},
+  {id:"mood", title:"自分の機嫌を自分で取る", group:"✍️ 表現"},
+  {id:"like", title:"好きなものをすぐ言える", group:"✍️ 表現"},
+
+  // 人
+  {id:"friend", title:"趣味の友達をつくる", group:"🤝 人"}
+];
+
+/* ===============================
+   Firestore 参照
+================================ */
+const goalRef = db
+  .collection("users")
+  .doc(userId)
+  .collection("goals");
+
+const highlightRef = db
+  .collection("users")
+  .doc(userId)
+  .collection("highlights");
+
+/* ===============================
+   🌕 月間ハイライト
+================================ */
+const mh = document.getElementById("monthlyHighlights");
+
+function renderHighlights(snapshot) {
+  mh.innerHTML = "";
+  for (let m = 1; m <= 12; m++) {
+    const doc = snapshot.docs.find(d => d.id === String(m));
+    const text = doc ? doc.data().text : "";
+    mh.innerHTML += `
+      <div class="month-highlight">
+        <strong>${m}月</strong>
+        <textarea data-month="${m}">${text}</textarea>
+      </div>
+    `;
+  }
+}
+
+highlightRef.onSnapshot(snapshot => {
+  renderHighlights(snapshot);
+});
+
+mh.addEventListener("input", e => {
+  if (!e.target.dataset.month) return;
+  highlightRef.doc(e.target.dataset.month).set({
+    text: e.target.value,
+    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+});
+
+/* ===============================
+   🎯 目標カード
+================================ */
+let goalCache = [];
+
+goalRef.onSnapshot(snapshot => {
+  goalCache = snapshot.docs.map(d => ({
+    id: d.id,
+    ...d.data()
+  }));
+  renderGoals();
+});
+
+function renderGoals() {
+  const container = document.getElementById("goalContainer");
+  container.innerHTML = "";
+
+  const sorted = [...goals].sort((a, b) => {
+    const A = goalCache.find(g => g.id === a.id)?.updatedAt?.toMillis?.() || 0;
+    const B = goalCache.find(g => g.id === b.id)?.updatedAt?.toMillis?.() || 0;
+    return B - A;
+  });
+
+  sorted.forEach(g => {
+    const d = goalCache.find(x => x.id === g.id) || {};
+    const div = document.createElement("div");
+    div.className = "goal-card";
+    div.innerHTML = `
+      <strong>${g.group}｜${g.title}</strong>
+      <select>
+        <option ${d.state==="意識中"?"selected":""}>意識中</option>
+        <option ${d.state==="進行中"?"selected":""}>進行中</option>
+        <option ${d.state==="一時停止"?"selected":""}>一時停止</option>
+        <option ${d.state==="達成"?"selected":""}>達成</option>
+      </select>
+      <textarea placeholder="メモ">${d.memo || ""}</textarea>
+      <input type="date" value="${d.date || ""}">
+    `;
+    const [sel, ta, dt] = div.querySelectorAll("select, textarea, input");
+
+    const save = () => {
+      goalRef.doc(g.id).set({
+        state: sel.value,
+        memo: ta.value,
+        date: dt.value,
+        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+      });
+    };
+
+    sel.onchange = ta.oninput = dt.onchange = save;
+    container.appendChild(div);
+  });
+}
+</script>
 
 </body>
 </html>
