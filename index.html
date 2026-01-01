@@ -128,7 +128,14 @@ const firebaseConfig = {
   <textarea id="memo" style="width:100%;min-height:80px;"></textarea>
 </section>
 
-<button type="button" onclick="saveLog()">保存する</button>
+<button
+  type="button"
+  onclick="saveLog()"
+  style="position: relative; z-index: 9999;"
+>
+  保存する
+</button>
+
 
 
 <h2>📜 これまでの記録</h2>
