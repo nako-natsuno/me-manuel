@@ -4,6 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Wake Up Log</title>
+
+    <!-- アイコン設定（重要） -->
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+  <link rel="icon" href="icon.png">
+  
   <style>
     body {
       font-family: sans-serif;
@@ -41,6 +46,28 @@
     input[type="time"] {
       font-size: 14px;
     }
+/* 起床ログ 横並び */
+.wake-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 6px;
+}
+
+/* 削除ボタンを小さく */
+button.small {
+  font-size: 12px;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+/* スマホ用 微調整 */
+@media (max-width: 600px) {
+  button.small {
+    font-size: 11px;
+    padding: 4px 6px;
+  }
+}
 
 @media (max-width: 600px) {
   body {
@@ -210,15 +237,16 @@ function updateTime(index, newTime) {
 
       const div = document.createElement("div");
       div.className = "log";
-      div.innerHTML = `
-        <strong>${entry.date}</strong>
-        ${isEarly ? "🌟" : ""}
-        <br>
-        ⏰ <input type="time" value="${entry.time}"
-          onchange="updateTime(${realIndex}, this.value)">
-        <br>
-        <button class="delete" onclick="deleteWake(${realIndex})">削除</button>
-      `;
+    div.innerHTML = `
+  <strong>${entry.date}</strong>
+  ${isEarly ? "🌟" : ""}
+  <div class="wake-row">
+    <input type="time" value="${entry.time}"
+      onchange="updateTime(${realIndex}, this.value)">
+    <button class="delete small"
+      onclick="deleteWake(${realIndex})">削除</button>
+  </div>
+`;
       list.appendChild(div);
     });
   }
