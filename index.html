@@ -128,7 +128,8 @@ const firebaseConfig = {
   <textarea id="memo" style="width:100%;min-height:80px;"></textarea>
 </section>
 
-<button onclick="saveLog()">保存する</button>
+<button type="button" onclick="saveLog()">保存する</button>
+
 
 <h2>📜 これまでの記録</h2>
 <div id="logList"></div>
@@ -158,6 +159,8 @@ if (!userId) {
   let logsCache = [];
 
   async function saveLog() {
+      alert("SAVE CLICKED");
+    
     const mood = document.querySelector('input[name="mood"]:checked')?.value;
     const emotions = [...document.querySelectorAll('section:nth-of-type(2) input:checked')].map(e => e.value);
     const needs = [...document.querySelectorAll('section:nth-of-type(3) input:checked')].map(e => e.value);
