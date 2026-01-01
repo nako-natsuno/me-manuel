@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
 <title>🎯 2026年の指針</title>
 
 <link rel="icon" href="icon.png">
@@ -25,39 +24,6 @@ section {
   margin-bottom: 16px;
 }
 
-.goal-card {
-  border: 1px solid #ddd;
-  border-radius: 8px;
-  padding: 12px;
-  margin: 12px 0;
-  background: #fafafa;
-}
-
-.goal-card strong {
-  display: block;
-  margin-bottom: 6px;
-}
-
-.goal-card textarea,
-.goal-card select,
-.goal-card input[type="date"] {
-  width: 100%;
-  margin-top: 4px;
-  padding: 6px;
-  font-size: 14px;
-}
-
-.month-highlight textarea {
-  width: 100%;
-  min-height: 60px;
-  margin-top: 6px;
-}
-
-.note {
-  font-size: 14px;
-  color: #666;
-}
-
 details {
   background: #fff;
   border-radius: 10px;
@@ -70,6 +36,63 @@ summary {
   cursor: pointer;
 }
 
+.goal-card {
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 12px;
+  margin: 12px 0;
+  background: #fafafa;
+}
+
+.view-mode strong {
+  display: block;
+  margin-bottom: 4px;
+}
+
+.meta {
+  font-size: 13px;
+  color: #555;
+}
+
+.memo-preview {
+  font-size: 14px;
+  margin: 4px 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stamp-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  margin-top: 6px;
+}
+
+.stamp {
+  font-size: 18px;
+}
+
+button {
+  margin-top: 6px;
+  padding: 4px 8px;
+}
+
+.edit-mode {
+  display: none;
+}
+
+.month-highlight textarea {
+  width: 100%;
+  min-height: 60px;
+  margin-top: 6px;
+}
+
+.note {
+  font-size: 14px;
+  color: #666;
+}
 </style>
 </head>
 
@@ -90,29 +113,26 @@ summary {
 
 <section class="note">
   ここは進捗を測る場所ではない。<br>
-  意識を戻すための場所。
+  向きを思い出すための場所。
 </section>
 
-<!-- 🌕 月間ハイライト -->
-<section>
-  <h2>🌕 月間ハイライト</h2>
-  <div id="monthlyHighlights"></div>
-</section>
-
-<!-- 🎯 目標カード -->
 <section>
   <h2>📦 目標カード</h2>
   <div id="goalContainer"></div>
 </section>
 
-<!-- ================= Firebase ================= -->
+<!-- 🌕 月間ハイライト（折りたたみ） -->
+<details>
+  <summary>🌕 月間ハイライト</summary>
+  <div id="monthlyHighlights"></div>
+</details>
 
-<!-- Firebase SDK（先に読み込む） -->
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* ===== Firebase 初期化（1回だけ） ===== */
+/* ================= Firebase ================= */
 const firebaseConfig = {
   apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
   authDomain: "me-manuel.firebaseapp.com",
@@ -124,58 +144,45 @@ const firebaseConfig = {
 
 firebase.initializeApp(firebaseConfig);
 const db = firebase.firestore();
-
-/* ===== ユーザーID（固定） ===== */
 const userId = "me-manuel-main-user";
 
-/* ===== Firestore参照 ===== */
 const goalRef = db.collection("users").doc(userId).collection("goals");
 const highlightRef = db.collection("users").doc(userId).collection("highlights");
 
-/* ===== 目標定義（全件） ===== */
+/* ================= 目標定義 ================= */
 const goals = [
-  // 🍽 生活
   { id:"beer", title:"1年間ビール禁止", group:"🍽 生活" },
   { id:"pasta", title:"1年間パスタ禁止", group:"🍽 生活" },
   { id:"natto", title:"迷ったら納豆ご飯＋味噌汁", group:"🍽 生活" },
-  { id:"cold_move", title:"寒くなったら体を動かす", group:"🍽 生活" },
+  { id:"cold", title:"寒くなったら体を動かす", group:"🍽 生活" },
 
-  // 💪 健康
-  { id:"weight", title:"ベストコンディション体型48kg", group:"💪 健康" },
-  { id:"no_cross", title:"脚を組まない", group:"💪 健康" },
+  { id:"weight", title:"ベスト体型48kg", group:"💪 健康" },
+  { id:"posture", title:"脚を組まない", group:"💪 健康" },
   { id:"sweat", title:"汗をかく", group:"💪 健康" },
-  { id:"facepack", title:"フェイスパックを習慣化", group:"💪 健康" },
+  { id:"face", title:"フェイスパック習慣", group:"💪 健康" },
   { id:"early", title:"早起き", group:"💪 健康" },
 
-  // 💰 お金
   { id:"asset", title:"資産400万円", group:"💰 お金" },
-  { id:"side", title:"副業で年間5万円", group:"💰 お金" },
-  { id:"ai", title:"AIでお金を稼ぐ", group:"💰 お金" },
-  { id:"stock", title:"個別株投資を始める", group:"💰 お金" },
+  { id:"side", title:"副業5万円", group:"💰 お金" },
+  { id:"ai", title:"AIで稼ぐ", group:"💰 お金" },
+  { id:"stock", title:"個別株投資", group:"💰 お金" },
   { id:"fp", title:"FP2級合格", group:"💰 お金" },
 
-  // 📚 学び
-  { id:"read50", title:"年間読書50冊", group:"📚 学び" },
-  { id:"reader_app", title:"読書通帳アプリを作る", group:"📚 学び" },
-  { id:"news", title:"ニュースチェック習慣化", group:"📚 学び" },
-  { id:"memo", title:"メモを取る", group:"📚 学び" },
-  { id:"memory", title:"記憶力を高める", group:"📚 学び" },
-  { id:"toeic", title:"TOEIC700点", group:"📚 学び" },
-  { id:"english", title:"英語で道案内できる", group:"📚 学び" },
+  { id:"read", title:"年間読書50冊", group:"📚 学び" },
+  { id:"news", title:"ニュース習慣", group:"📚 学び" },
+  { id:"memo", title:"メモ習慣", group:"📚 学び" },
+  { id:"memory", title:"記憶力UP", group:"📚 学び" },
+  { id:"toeic", title:"TOEIC700", group:"📚 学び" },
 
-  // ✍️ 表現
-  { id:"diary", title:"日記・記録を習慣化", group:"✍️ 表現" },
-  { id:"sns", title:"SNS/note発信をものにする", group:"✍️ 表現" },
-  { id:"manual", title:"自分の取説を作る", group:"✍️ 表現" },
-  { id:"mood", title:"自分の機嫌を自分で取る", group:"✍️ 表現" },
-  { id:"like", title:"好きなものをすぐ言える", group:"✍️ 表現" },
+  { id:"diary", title:"日記習慣", group:"✍️ 表現" },
+  { id:"sns", title:"SNS発信", group:"✍️ 表現" },
+  { id:"manual", title:"自分の取説", group:"✍️ 表現" },
+  { id:"mood", title:"自分の機嫌を取る", group:"✍️ 表現" },
 
-  // 🤝 人
-  { id:"friend", title:"趣味の友達をつくる", group:"🤝 人" }
+  { id:"friend", title:"趣味の友達", group:"🤝 人" }
 ];
 
-
-/* ===== 月間ハイライト描画 ===== */
+/* ================= 月間ハイライト ================= */
 const mh = document.getElementById("monthlyHighlights");
 
 for (let m = 1; m <= 12; m++) {
@@ -187,6 +194,13 @@ for (let m = 1; m <= 12; m++) {
   `;
 }
 
+highlightRef.onSnapshot(snapshot => {
+  snapshot.forEach(doc => {
+    const ta = mh.querySelector(`[data-month="${doc.id}"]`);
+    if (ta) ta.value = doc.data().text || "";
+  });
+});
+
 mh.addEventListener("input", e => {
   const m = e.target.dataset.month;
   if (!m) return;
@@ -196,59 +210,121 @@ mh.addEventListener("input", e => {
   });
 });
 
-/* ===== 目標カード描画 ===== */
+/* ================= スタンプ ================= */
+function stampByState(state) {
+  if (state === "達成") return "🎉";
+  if (state === "一時停止") return "⛔️";
+  return "😆";
+}
+
+function renderStamps(stamps = {}) {
+  let html = "";
+  for (let m = 1; m <= 12; m++) {
+    const key = `2026-${String(m).padStart(2,"0")}`;
+    html += `<span class="stamp">${stamps[key] || "▫️"}</span>`;
+  }
+  return html;
+}
+
+/* ================= 目標カード ================= */
+let goalCache = {};
 const container = document.getElementById("goalContainer");
 
-// ジャンルごとにまとめる
-const grouped = {};
-goals.forEach(g => {
-  if (!grouped[g.group]) grouped[g.group] = [];
-  grouped[g.group].push(g);
+goalRef.onSnapshot(snapshot => {
+  goalCache = {};
+  snapshot.forEach(doc => goalCache[doc.id] = doc.data());
+  renderGoals();
 });
 
-// 描画
-Object.keys(grouped).forEach(group => {
-  const details = document.createElement("details");
-  details.open = true;
+function renderGoals() {
+  container.innerHTML = "";
 
-  const summary = document.createElement("summary");
-  summary.textContent = group;
-  details.appendChild(summary);
-
-  grouped[group].forEach(g => {
-    const div = document.createElement("div");
-    div.className = "goal-card";
-    div.innerHTML = `
-      <strong>${g.title}</strong>
-      <select>
-        <option>意識中</option>
-        <option>進行中</option>
-        <option>一時停止</option>
-        <option>達成</option>
-      </select>
-      <textarea placeholder="メモ"></textarea>
-      <input type="date">
-    `;
-
-    const [sel, ta, dt] = div.querySelectorAll("select, textarea, input");
-
-    const save = () => {
-      goalRef.doc(g.id).set({
-        state: sel.value,
-        memo: ta.value,
-        date: dt.value,
-        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-      });
-    };
-
-    sel.onchange = ta.oninput = dt.onchange = save;
-
-    details.appendChild(div);
+  const grouped = {};
+  goals.forEach(g => {
+    if (!grouped[g.group]) grouped[g.group] = [];
+    grouped[g.group].push(g);
   });
 
-  container.appendChild(details);
-});
+  Object.keys(grouped).forEach(group => {
+    const details = document.createElement("details");
+    details.open = true;
 
+    const summary = document.createElement("summary");
+    summary.textContent = group;
+    details.appendChild(summary);
+
+    grouped[group].forEach(g => {
+      const d = goalCache[g.id] || {};
+
+      const card = document.createElement("div");
+      card.className = "goal-card";
+
+      card.innerHTML = `
+        <div class="view-mode">
+          <strong>${g.title}</strong>
+          <div class="meta">状態：${d.state || "未設定"}</div>
+          <div class="memo-preview">${(d.memo || "").slice(0,60)}</div>
+          <div class="stamp-row">
+            ${renderStamps(d.stamps)}
+            <button class="stamp-btn">今月</button>
+          </div>
+          <button class="edit-btn">編集</button>
+        </div>
+
+        <div class="edit-mode">
+          <select>
+            <option ${d.state==="意識中"?"selected":""}>意識中</option>
+            <option ${d.state==="進行中"?"selected":""}>進行中</option>
+            <option ${d.state==="一時停止"?"selected":""}>一時停止</option>
+            <option ${d.state==="達成"?"selected":""}>達成</option>
+          </select>
+          <textarea>${d.memo || ""}</textarea>
+          <input type="date" value="${d.date || ""}">
+          <button class="save-btn">保存</button>
+        </div>
+      `;
+
+      const view = card.querySelector(".view-mode");
+      const edit = card.querySelector(".edit-mode");
+      const editBtn = card.querySelector(".edit-btn");
+      const saveBtn = card.querySelector(".save-btn");
+      const stampBtn = card.querySelector(".stamp-btn");
+      const [sel, ta, dt] = edit.querySelectorAll("select, textarea, input");
+
+      editBtn.onclick = () => {
+        view.style.display = "none";
+        edit.style.display = "block";
+      };
+
+      saveBtn.onclick = () => {
+        goalRef.doc(g.id).set({
+          state: sel.value,
+          memo: ta.value,
+          date: dt.value,
+          stamps: d.stamps || {},
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      };
+
+      stampBtn.onclick = () => {
+        const now = new Date();
+        const key = `2026-${String(now.getMonth()+1).padStart(2,"0")}`;
+        const newStamps = {...(d.stamps || {})};
+        newStamps[key] = stampByState(d.state || "意識中");
+
+        goalRef.doc(g.id).set({
+          ...d,
+          stamps: newStamps,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      };
+
+      details.appendChild(card);
+    });
+
+    container.appendChild(details);
+  });
+}
 </script>
 
 </body>
