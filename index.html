@@ -269,7 +269,11 @@ function deleteLog(index) {
   data.splice(index, 1);
   localStorage.setItem("manualLogs", JSON.stringify(data));
   renderLogs();
-  function startEdit(index) {
+}
+
+/* 👇 ここから編集用（外に出す！） */
+
+function startEdit(index) {
   editingIndex = index;
   renderLogs();
 }
@@ -287,8 +291,6 @@ function saveEdit(index) {
   localStorage.setItem("manualLogs", JSON.stringify(data));
   editingIndex = null;
   renderLogs();
-}
-
 }
 
 </script>
