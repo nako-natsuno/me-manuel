@@ -57,6 +57,22 @@
       padding: 6px 10px;
       cursor: pointer;
     }
+
+  .app-icon {
+  width: 96px;
+  height: 96px;
+  display: block;
+  margin: 0 auto 12px;
+  border-radius: 20%;
+}
+
+.wake-button.disabled {
+  background: #ccc;
+  color: #666;
+  box-shadow: none;
+  cursor: default;
+}
+
   </style>
 
   <!-- Firebase（Firestoreのみ） -->
@@ -88,6 +104,8 @@
   <a href="wake.html">🌅 Wake Up Log</a>
 </nav>
 
+<img src="icon.png" alt="Me Manuel Icon" class="app-icon">
+
 <h1>🌅 Wake Up Log</h1>
 <p id="today"></p>
 
@@ -101,6 +119,8 @@
 
 <script>
   const today = new Date();
+  const todayStr = today.toISOString().slice(0, 10);
+
   document.getElementById("today").textContent =
     "📅 " + today.toLocaleDateString();
 
@@ -111,18 +131,26 @@
 
   let wakeCache = [];
 
-  /* 🌅 起床ログ追加 */
+  const wakeBtn = document.getElementById("wakeBtn");
+
+  /* 🌅 起床ログ追加（1日1回制限） */
   async function logWake() {
+    if (hasWokenToday()) return;
+
+    // 📳 軽いバイブ（iPhone対応）
+    if (navigator.vibrate) {
+      navigator.vibrate(30);
+    }
+
     const now = new Date();
     await wakeRef.add({
-      date: now.toISOString().slice(0, 10),
+      date: todayStr,
       time: now.toTimeString().slice(0, 5),
       createdAt: now.toISOString()
     });
   }
 
-  document.getElementById("wakeBtn")
-    .addEventListener("click", logWake);
+  wakeBtn.addEventListener("click", logWake);
 
   /* 🔄 リアルタイム同期 */
   function startRealtimeWakeLogs() {
@@ -134,8 +162,26 @@
           ...doc.data()
         }));
         renderWakeLogs();
-        console.log("Wake realtime:", wakeCache.length);
+        updateWakeButtonState();
       });
+  }
+
+  /* ✅ 今日すでに起きているか */
+  function hasWokenToday() {
+    return wakeCache.some(e => e.date === todayStr);
+  }
+
+  /* 🎛 ボタン状態制御 */
+  function updateWakeButtonState() {
+    if (hasWokenToday()) {
+      wakeBtn.textContent = "✅ 記録した";
+      wakeBtn.classList.add("disabled");
+      wakeBtn.disabled = true;
+    } else {
+      wakeBtn.textContent = "🌅 起きた！";
+      wakeBtn.classList.remove("disabled");
+      wakeBtn.disabled = false;
+    }
   }
 
   /* 🖼 描画 */
@@ -195,7 +241,7 @@
   }
 
   function renderMonthlyAverage(data) {
-    const month = today.toISOString().slice(0, 7);
+    const month = todayStr.slice(0, 7);
     const m = data.filter(e => e.date.startsWith(month));
     if (m.length === 0) return;
 
@@ -211,6 +257,7 @@
   /* 🔥 初期化 */
   startRealtimeWakeLogs();
 </script>
+
 
 </body>
 </html>
