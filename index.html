@@ -1,83 +1,97 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🐈 Me Manuel</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-<link rel="icon" href="icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+  <title>🐈 Me Manuel</title>
 
-<style>
-body {
-  font-family: sans-serif;
-  background: #f5f5f5;
-  padding: 20px;
-  line-height: 1.6;
-}
-section, .log {
-  background: white;
-  padding: 15px;
-  margin-bottom: 15px;
-  border-radius: 8px;
-}
-button {
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: none;
-  background: #4a90e2;
-  color: white;
-  cursor: pointer;
-}
-.log button {
-  margin-right: 8px;
-  background: #888;
-}
-.log .delete {
-  background: #d9534f;
-}
-label {
-  display: block;
-  margin-bottom: 6px;
-}
-input[type="radio"],
-input[type="checkbox"] {
-  transform: scale(1.3);
-  margin-right: 8px;
-}
-#saveArea {
-  position: fixed;
-  bottom: 20px;
-  left: 20px;
-  right: 20px;
-}
-#saveArea button {
-  width: 100%;
-  font-size: 20px;
-  padding: 16px;
-}
-</style>
+  <link rel="icon" href="icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+      line-height: 1.6;
+    }
 
-<script>
-const firebaseConfig = {
-  apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
-  authDomain: "me-manuel.firebaseapp.com",
-  projectId: "me-manuel",
-  storageBucket: "me-manuel.firebasestorage.app",
-  messagingSenderId: "322422156686",
-  appId: "1:322422156686:web:0bd42d600451496d8e48df"
-};
-firebase.initializeApp(firebaseConfig);
+    nav a {
+      margin-right: 10px;
+    }
 
-const db = firebase.firestore();
-const auth = firebase.auth();
-let userId = null;
-</script>
+    section, .log {
+      background: white;
+      padding: 15px;
+      margin-bottom: 15px;
+      border-radius: 8px;
+    }
+
+    button {
+      padding: 8px 14px;
+      border-radius: 6px;
+      border: none;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+    }
+
+    .log button {
+      margin-right: 8px;
+      background: #888;
+    }
+
+    .log .delete {
+      background: #d9534f;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
+
+    input[type="radio"],
+    input[type="checkbox"] {
+      transform: scale(1.3);
+      margin-right: 8px;
+    }
+
+    @media (max-width: 600px) {
+      body { font-size: 17px; }
+      label { font-size: 18px; }
+      button { font-size: 18px; padding: 14px 16px; }
+      textarea { font-size: 17px; }
+    }
+
+    #saveArea button {
+      width: 100%;
+      font-size: 20px;
+      padding: 16px;
+    }
+  </style>
+
+  <!-- Firebase（Firestoreのみ使用） -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
+      authDomain: "me-manuel.firebaseapp.com",
+      projectId: "me-manuel",
+      storageBucket: "me-manuel.firebasestorage.app",
+      messagingSenderId: "322422156686",
+      appId: "1:322422156686:web:0bd42d600451496d8e48df"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    /* 🔑 固定ユーザーID（Mac / iPhone 共通） */
+    const userId = "me-manuel-main-user";
+  </script>
 </head>
 
 <body>
@@ -91,145 +105,156 @@ let userId = null;
 <p id="today"></p>
 
 <section>
-<strong>今の気分</strong>
-<label><input type="radio" name="mood" value="とても良い"> とても良い</label>
-<label><input type="radio" name="mood" value="良い"> 良い</label>
-<label><input type="radio" name="mood" value="普通"> 普通</label>
-<label><input type="radio" name="mood" value="微妙"> 微妙</label>
-<label><input type="radio" name="mood" value="しんどい"> しんどい</label>
+  <strong>今の気分</strong>
+  <label><input type="radio" name="mood" value="とても良い"> とても良い</label>
+  <label><input type="radio" name="mood" value="良い"> 良い</label>
+  <label><input type="radio" name="mood" value="普通"> 普通</label>
+  <label><input type="radio" name="mood" value="微妙"> 微妙</label>
+  <label><input type="radio" name="mood" value="しんどい"> しんどい</label>
 </section>
 
 <section>
-<strong>今の感情（複数OK）</strong>
-<label><input type="checkbox" value="嬉しさ"> 嬉しさ</label>
-<label><input type="checkbox" value="安心"> 安心</label>
-<label><input type="checkbox" value="満足"> 満足</label>
-<label><input type="checkbox" value="感謝"> 感謝</label>
-<label><input type="checkbox" value="疲れ"> 疲れ</label>
-<label><input type="checkbox" value="不安"> 不安</label>
-<label><input type="checkbox" value="焦り"> 焦り</label>
-<label><input type="checkbox" value="イライラ"> イライラ</label>
+  <strong>今の感情（複数OK）</strong>
+  <label><input type="checkbox" value="嬉しさ"> 嬉しさ</label>
+  <label><input type="checkbox" value="安心"> 安心</label>
+  <label><input type="checkbox" value="満足"> 満足</label>
+  <label><input type="checkbox" value="感謝"> 感謝</label>
+  <label><input type="checkbox" value="疲れ"> 疲れ</label>
+  <label><input type="checkbox" value="不安"> 不安</label>
+  <label><input type="checkbox" value="焦り"> 焦り</label>
+  <label><input type="checkbox" value="イライラ"> イライラ</label>
 </section>
 
 <section>
-<strong>今の自分に必要なこと</strong>
-<label><input type="checkbox" value="一人の時間"> 一人の時間</label>
-<label><input type="checkbox" value="しっかり休む"> しっかり休む</label>
-<label><input type="checkbox" value="何もしない"> 何もしない</label>
-<label><input type="checkbox" value="気分転換"> 気分転換</label>
-<label><input type="checkbox" value="話を聞いてもらう"> 話を聞いてもらう</label>
-<label><input type="checkbox" value="そっとしておいてほしい"> そっとしておいてほしい</label>
+  <strong>今の自分に必要なこと</strong>
+  <label><input type="checkbox" value="一人の時間"> 一人の時間</label>
+  <label><input type="checkbox" value="しっかり休む"> しっかり休む</label>
+  <label><input type="checkbox" value="何もしない"> 何もしない</label>
+  <label><input type="checkbox" value="気分転換"> 気分転換</label>
+  <label><input type="checkbox" value="話を聞いてもらう"> 話を聞いてもらう</label>
+  <label><input type="checkbox" value="そっとしておいてほしい"> そっとしておいてほしい</label>
 </section>
 
 <section>
-<strong>今日のひとこと（自由メモ）</strong>
-<textarea id="memo" style="width:100%;min-height:80px;"></textarea>
-</section>
+  <strong>今日のひとこと（自由メモ）</strong>
+  <textarea id="memo" style="width:100%;min-height:80px;"></textarea>
 
-<div id="saveArea">
-  <button id="saveBtn">保存する</button>
-</div>
+  <!-- 保存ボタンをここに配置 -->
+  <div style="margin-top:15px;">
+    <button id="saveBtn" style="width:100%;font-size:18px;padding:14px;">
+      保存する
+    </button>
+  </div>
+</section>
 
 <h2>📜 これまでの記録</h2>
 <div id="logList"></div>
 
 <script>
-document.getElementById("today").textContent =
-  "📅 " + new Date().toLocaleDateString();
+  document.getElementById("today").textContent =
+    "📅 " + new Date().toLocaleDateString();
 
-let logsCache = [];
-let editingId = null;
+  let logsCache = [];
+  let editingId = null;
 
-/* 🔐 Firebase 匿名認証（Mac / iPhone 同期の核） */
-auth.signInAnonymously().then(res => {
-  userId = res.user.uid;
-  loadLogs();
-});
+  const logsRef = db
+    .collection("users")
+    .doc(userId)
+    .collection("manualLogs");
 
-/* 💾 保存 */
-async function saveLog() {
-  const mood = document.querySelector('input[name="mood"]:checked')?.value || null;
-  const emotions = [...document.querySelectorAll('section:nth-of-type(2) input:checked')].map(e => e.value);
-  const needs = [...document.querySelectorAll('section:nth-of-type(3) input:checked')].map(e => e.value);
-  const memo = document.getElementById("memo").value;
+  /* 保存 */
+  async function saveLog() {
+    const mood =
+      document.querySelector('input[name="mood"]:checked')?.value || null;
 
-  const ref = db.collection("users").doc(userId).collection("manualLogs");
+    const emotions =
+      [...document.querySelectorAll('section:nth-of-type(2) input:checked')]
+        .map(e => e.value);
 
-  if (editingId) {
-    await ref.doc(editingId).update({ mood, emotions, needs, memo });
-    editingId = null;
-  } else {
-    await ref.add({
-      mood, emotions, needs, memo,
-      date: new Date().toISOString()
+    const needs =
+      [...document.querySelectorAll('section:nth-of-type(3) input:checked')]
+        .map(e => e.value);
+
+    const memo = document.getElementById("memo").value;
+
+    if (editingId) {
+      await logsRef.doc(editingId).update({
+        mood, emotions, needs, memo
+      });
+      editingId = null;
+    } else {
+      await logsRef.add({
+        mood,
+        emotions,
+        needs,
+        memo,
+        date: new Date().toISOString()
+      });
+    }
+
+    resetForm();
+    loadLogs();
+  }
+
+  /* 読み込み */
+  async function loadLogs() {
+    const snapshot = await logsRef.orderBy("date").get();
+    logsCache = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+    renderLogs();
+  }
+
+  /* 表示 */
+  function renderLogs() {
+    const list = document.getElementById("logList");
+    list.innerHTML = "";
+
+    logsCache.slice().reverse().forEach(l => {
+      const div = document.createElement("div");
+      div.className = "log";
+      div.innerHTML = `
+        <strong>${new Date(l.date).toLocaleString()}</strong><br>
+        気分：${l.mood || "-"}<br>
+        感情：${(l.emotions || []).join("、")}<br>
+        必要：${(l.needs || []).join("、")}<br>
+        📝 ${(l.memo || "").replace(/\n/g,"<br>")}
+        <br><br>
+        <button onclick="editLog('${l.id}')">編集</button>
+        <button class="delete" onclick="deleteLog('${l.id}')">削除</button>
+      `;
+      list.appendChild(div);
     });
   }
 
-  resetForm();
+  /* 編集 */
+  function editLog(id) {
+    const l = logsCache.find(e => e.id === id);
+    if (!l) return;
+
+    editingId = id;
+    document.getElementById("memo").value = l.memo || "";
+  }
+
+  /* 削除 */
+  async function deleteLog(id) {
+    if (!confirm("このログを削除しますか？")) return;
+    await logsRef.doc(id).delete();
+    loadLogs();
+  }
+
+  /* リセット */
+  function resetForm() {
+    document.querySelectorAll("input").forEach(e => e.checked = false);
+    document.getElementById("memo").value = "";
+  }
+
+  document.getElementById("saveBtn")
+    .addEventListener("click", saveLog);
+
+  /* 初期読み込み */
   loadLogs();
-}
-
-/* 🔄 読み込み */
-async function loadLogs() {
-  const snap = await db.collection("users")
-    .doc(userId)
-    .collection("manualLogs")
-    .orderBy("date")
-    .get();
-
-  logsCache = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-  renderLogs();
-}
-
-/* 🖼 表示 */
-function renderLogs() {
-  const list = document.getElementById("logList");
-  list.innerHTML = "";
-
-  logsCache.slice().reverse().forEach(l => {
-    const div = document.createElement("div");
-    div.className = "log";
-    div.innerHTML = `
-      <strong>${new Date(l.date).toLocaleString()}</strong><br>
-      気分：${l.mood || "-"}<br>
-      感情：${(l.emotions || []).join("、")}<br>
-      必要：${(l.needs || []).join("、")}<br>
-      📝 ${(l.memo || "").replace(/\n/g,"<br>")}
-      <br><br>
-      <button onclick="editLog('${l.id}')">編集</button>
-      <button class="delete" onclick="deleteLog('${l.id}')">削除</button>
-    `;
-    list.appendChild(div);
-  });
-}
-
-/* ✏️ 編集 */
-function editLog(id) {
-  const l = logsCache.find(e => e.id === id);
-  if (!l) return;
-
-  editingId = id;
-  document.getElementById("memo").value = l.memo || "";
-}
-
-/* 🗑 削除 */
-async function deleteLog(id) {
-  if (!confirm("このログを削除しますか？")) return;
-  await db.collection("users")
-    .doc(userId)
-    .collection("manualLogs")
-    .doc(id)
-    .delete();
-  loadLogs();
-}
-
-/* 🔁 リセット */
-function resetForm() {
-  document.querySelectorAll("input").forEach(e => e.checked = false);
-  document.getElementById("memo").value = "";
-}
-
-document.getElementById("saveBtn").addEventListener("click", saveLog);
 </script>
 
 </body>
