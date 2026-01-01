@@ -168,9 +168,11 @@ const mh = document.getElementById("monthlyHighlights");
 
 function renderHighlights(snapshot) {
   mh.innerHTML = "";
+
   for (let m = 1; m <= 12; m++) {
     const doc = snapshot.docs.find(d => d.id === String(m));
     const text = doc ? doc.data().text : "";
+
     mh.innerHTML += `
       <div class="month-highlight">
         <strong>${m}月</strong>
@@ -179,6 +181,7 @@ function renderHighlights(snapshot) {
     `;
   }
 }
+
 
 highlightRef.onSnapshot(snapshot => {
   renderHighlights(snapshot);
@@ -209,27 +212,26 @@ function renderGoals() {
   const container = document.getElementById("goalContainer");
   container.innerHTML = "";
 
-  const sorted = [...goals].sort((a, b) => {
-    const A = goalCache.find(g => g.id === a.id)?.updatedAt?.toMillis?.() || 0;
-    const B = goalCache.find(g => g.id === b.id)?.updatedAt?.toMillis?.() || 0;
-    return B - A;
-  });
-
-  sorted.forEach(g => {
+  goals.forEach(g => {
     const d = goalCache.find(x => x.id === g.id) || {};
+
     const div = document.createElement("div");
     div.className = "goal-card";
     div.innerHTML = `
       <strong>${g.group}｜${g.title}</strong>
+
       <select>
         <option ${d.state==="意識中"?"selected":""}>意識中</option>
         <option ${d.state==="進行中"?"selected":""}>進行中</option>
         <option ${d.state==="一時停止"?"selected":""}>一時停止</option>
         <option ${d.state==="達成"?"selected":""}>達成</option>
       </select>
+
       <textarea placeholder="メモ">${d.memo || ""}</textarea>
+
       <input type="date" value="${d.date || ""}">
     `;
+
     const [sel, ta, dt] = div.querySelectorAll("select, textarea, input");
 
     const save = () => {
@@ -245,6 +247,7 @@ function renderGoals() {
     container.appendChild(div);
   });
 }
+
 </script>
 
 </body>
