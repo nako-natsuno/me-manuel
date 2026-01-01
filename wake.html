@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>Wake Up Log</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      background: #f0f6ff;
+      padding: 20px;
+      line-height: 1.6;
+    }
+    .wake-button {
+      font-size: 28px;
+      padding: 30px;
+      width: 100%;
+      border-radius: 16px;
+      border: none;
+      background: #ffb347;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
+    button {
+      font-size: 14px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+    }
+    button.delete {
+      background: #d9534f;
+      color: white;
+    }
+    .log, .box {
+      background: white;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 8px;
+    }
+    input[type="time"] {
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+
+<nav style="margin-bottom:20px;">
+  <a href="index.html">🏠 Home</a> |
+  <a href="wake.html">🌅 Wake Up Log</a>
+</nav>
+
+<h1>🌅 Wake Up Log</h1>
+<p id="today"></p>
+
+<button class="wake-button" onclick="logWake()">🌅 起きた！</button>
+
+<div class="box" id="averageTime"></div>
+<div class="box" id="monthlyAverage"></div>
+
+<h2>📜 起床の記録</h2>
+<div id="wakeList"></div>
+
+<script>
+  const TARGET_TIME = "06:00"; // 目標起床時間
+
+  const today = new Date();
+  document.getElementById("today").textContent =
+    "📅 " + today.getFullYear() + "年" +
+    (today.getMonth() + 1) + "月" +
+    today.getDate() + "日";
+
+  function logWake() {
+    const now = new Date();
+    const entry = {
+      date: now.toISOString().slice(0,10), // YYYY-MM-DD
+      time: now.toTimeString().slice(0,5)  // HH:MM
+    };
+
+    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
+    data.push(entry);
+    localStorage.setItem("wakeLogs", JSON.stringify(data));
+
+    // ホーム用（今日の起床）
+    localStorage.setItem("todayWake", JSON.stringify(entry));
+
+    renderWakeLogs();
+  }
+
+ function deleteWake(index) {
+  if (!confirm("この起床ログを削除しますか？")) return;
+
+  const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
+  const removed = data[index];
+  data.splice(index, 1);
+  localStorage.setItem("wakeLogs", JSON.stringify(data));
+
+  // 今日の起床を消したなら todayWake も消す
+  const todayStr = new Date().toISOString().slice(0,10);
+  if (removed.date === todayStr) {
+    localStorage.removeItem("todayWake");
+  }
+
+  renderWakeLogs();
+}
+
+
+function updateTime(index, newTime) {
+  const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
+  data[index].time = newTime;
+  localStorage.setItem("wakeLogs", JSON.stringify(data));
+
+  // 今日の起床なら todayWake も更新
+  const todayStr = new Date().toISOString().slice(0,10);
+  if (data[index].date === todayStr) {
+    localStorage.setItem("todayWake", JSON.stringify(data[index]));
+  }
+
+  renderWakeLogs();
+}
+
+
+  function timeToMinutes(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function renderAverage(data) {
+    if (data.length === 0) {
+      document.getElementById("averageTime").textContent =
+        "📊 平均起床時間：データなし";
+      return;
+    }
+    const avg =
+      Math.round(data.reduce((s, e) => s + timeToMinutes(e.time), 0) / data.length);
+    document.getElementById("averageTime").textContent =
+      `📊 平均起床時間：${String(Math.floor(avg/60)).padStart(2,"0")}:${String(avg%60).padStart(2,"0")}`;
+  }
+
+  function renderMonthlyAverage(data) {
+    const thisMonth = today.toISOString().slice(0,7);
+    const monthData = data.filter(d => d.date.startsWith(thisMonth));
+    if (monthData.length === 0) {
+      document.getElementById("monthlyAverage").textContent =
+        "📈 今月の平均：データなし";
+      return;
+    }
+    const avg =
+      Math.round(monthData.reduce((s, e) => s + timeToMinutes(e.time), 0) / monthData.length);
+    document.getElementById("monthlyAverage").textContent =
+      `📈 今月の平均起床：${String(Math.floor(avg/60)).padStart(2,"0")}:${String(avg%60).padStart(2,"0")}`;
+  }
+
+  function renderWakeLogs() {
+    const list = document.getElementById("wakeList");
+    list.innerHTML = "";
+
+    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
+    renderAverage(data);
+    renderMonthlyAverage(data);
+
+    if (data.length === 0) {
+      list.textContent = "まだ起床ログはありません。";
+      return;
+    }
+
+    const targetMin = timeToMinutes(TARGET_TIME);
+
+    data.slice().reverse().forEach((entry, i) => {
+      const realIndex = data.length - 1 - i;
+      const isEarly = timeToMinutes(entry.time) <= targetMin;
+
+      const div = document.createElement("div");
+      div.className = "log";
+      div.innerHTML = `
+        <strong>${entry.date}</strong>
+        ${isEarly ? "🌟" : ""}
+        <br>
+        ⏰ <input type="time" value="${entry.time}"
+          onchange="updateTime(${realIndex}, this.value)">
+        <br>
+        <button class="delete" onclick="deleteWake(${realIndex})">削除</button>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  renderWakeLogs();
+</script>
+
+</body>
+</html>
