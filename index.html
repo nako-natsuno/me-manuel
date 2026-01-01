@@ -1,16 +1,14 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <link rel="icon" href="icon.png">
-<link rel="apple-touch-icon" href="icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
-
-
   <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🐈 Me Manuel</title>
 
-  <title>Me Manuel</title>
+  <link rel="icon" href="icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+
   <style>
     body {
       font-family: sans-serif;
@@ -18,15 +16,18 @@
       padding: 20px;
       line-height: 1.6;
     }
+
     nav a {
       margin-right: 10px;
     }
+
     section, .box {
       background: white;
       padding: 15px;
       margin-bottom: 15px;
       border-radius: 8px;
     }
+
     button {
       padding: 8px 14px;
       border-radius: 6px;
@@ -35,134 +36,112 @@
       color: white;
       cursor: pointer;
     }
+
     .log {
       background: #f0f4ff;
       padding: 10px;
       border-radius: 6px;
       margin-bottom: 10px;
     }
-    /* スマホ向け調整 */
-@media (max-width: 600px) {
-  body {
-    font-size: 17px;
-  }
 
-  h1 {
-    font-size: 22px;
-  }
+    /* 選択肢の余白を正しく管理 */
+    label {
+      display: block;
+      margin-bottom: 6px;
+      line-height: 1.6;
+    }
 
-  h2 {
-    font-size: 20px;
-  }
+    input[type="radio"],
+    input[type="checkbox"] {
+      transform: scale(1.4);
+      margin-right: 8px;
+    }
 
-  section strong {
-    font-size: 18px;
-  }
+    /* スマホ用調整 */
+    @media (max-width: 600px) {
+      body {
+        font-size: 17px;
+      }
 
-  label {
-    font-size: 18px;
-    line-height: 1.8;
-    display: block;
-  }
+      h1 {
+        font-size: 22px;
+      }
 
-  textarea {
-    font-size: 17px;
-  }
+      h2 {
+        font-size: 20px;
+      }
 
-  button {
-    font-size: 18px;
-    padding: 14px 16px;
-  }
+      section strong {
+        font-size: 18px;
+      }
 
-  .log {
-    font-size: 16px;
-  }
-}
+      label {
+        font-size: 18px;
+        line-height: 1.8;
+      }
 
+      textarea {
+        font-size: 17px;
+      }
 
-input[type="radio"],
-input[type="checkbox"] {
-  transform: scale(1.4);
-  margin-right: 8px;
-}
+      button {
+        font-size: 18px;
+        padding: 14px 16px;
+      }
 
+      .log {
+        font-size: 16px;
+      }
+    }
   </style>
 </head>
+
 <body>
 
 <nav style="margin-bottom:20px;">
-  <a href="index.html">🏠 Home</a>|
-  <a href="wake.html">🌅 Wake Up</a>
+  <a href="index.html">🏠 Home</a> |
+  <a href="wake.html">🌅 Wake Up Log</a>
 </nav>
 
 <h1>🐈 Me Manuel</h1>
 <p id="today"></p>
-<div class="box" id="todayWake"></div>
 
 <section>
-  <strong>今の気分（5段階）</strong><br>
-  <label><input type="radio" name="mood" value="とても良い"> とても良い</label><br>
-  <label><input type="radio" name="mood" value="良い"> 良い</label><br>
-  <label><input type="radio" name="mood" value="普通"> 普通</label><br>
-  <label><input type="radio" name="mood" value="少ししんどい"> 少ししんどい</label><br>
-  <label><input type="radio" name="mood" value="かなりしんどい"> かなりしんどい</label>
+  <strong>今の気分</strong>
+  <label><input type="radio" name="mood" value="とても良い"> とても良い</label>
+  <label><input type="radio" name="mood" value="良い"> 良い</label>
+  <label><input type="radio" name="mood" value="普通"> 普通</label>
+  <label><input type="radio" name="mood" value="微妙"> 微妙</label>
+  <label><input type="radio" name="mood" value="しんどい"> しんどい</label>
 </section>
 
-
 <section>
-  <strong>今の感情（複数OK）</strong><br>
+  <strong>今の感情（複数OK）</strong>
 
-  <!-- 良い感情 -->
-  <label><input type="checkbox" value="嬉しさ"> 嬉しさ</label><br>
-  <label><input type="checkbox" value="安心"> 安心</label><br>
-  <label><input type="checkbox" value="満足"> 満足</label><br>
-  <label><input type="checkbox" value="感謝"> 感謝</label><br>
+  <label><input type="checkbox" value="嬉しさ"> 嬉しさ</label>
+  <label><input type="checkbox" value="安心"> 安心</label>
+  <label><input type="checkbox" value="満足"> 満足</label>
+  <label><input type="checkbox" value="感謝"> 感謝</label>
 
-  <!-- 中立 -->
-  <label><input type="checkbox" value="落ち着き"> 落ち着き</label><br>
-  <label><input type="checkbox" value="無感情"> 何も感じない</label><br>
-
-  <!-- つらい感情 -->
-  <label><input type="checkbox" value="疲れ"> 疲れ</label><br>
-  <label><input type="checkbox" value="不安"> 不安</label><br>
-  <label><input type="checkbox" value="焦り"> 焦り</label><br>
-  <label><input type="checkbox" value="イライラ"> イライラ</label><br>
+  <label><input type="checkbox" value="疲れ"> 疲れ</label>
+  <label><input type="checkbox" value="不安"> 不安</label>
+  <label><input type="checkbox" value="焦り"> 焦り</label>
+  <label><input type="checkbox" value="イライラ"> イライラ</label>
 </section>
 
-
 <section>
-  <strong>今の自分に必要なこと</strong><br>
+  <strong>今の自分に必要なこと</strong>
 
-  <!-- 休息・回復 -->
-  <label><input type="checkbox" value="しっかり休む"> しっかり休む</label><br>
-  <label><input type="checkbox" value="何もしない"> 何もしない</label><br>
-  <label><input type="checkbox" value="早く寝る"> 早く寝る</label><br>
-
-  <br>
-
-  <!-- 環境 -->
-  <label><input type="checkbox" value="一人の時間"> 一人の時間</label><br>
-  <label><input type="checkbox" value="人と話す"> 人と話す</label><br>
-  <label><input type="checkbox" value="そっとしておいてほしい"> そっとしておいてほしい</label><br>
-
-  <br>
-
-  <!-- 行動 -->
-  <label><input type="checkbox" value="気分転換"> 気分転換</label><br>
-  <label><input type="checkbox" value="外に出る"> 外に出る</label><br>
-  <label><input type="checkbox" value="体を動かす"> 体を動かす</label><br>
-
-  <br>
-
-  <!-- 心の扱い -->
-  <label><input type="checkbox" value="自分を責めない"> 自分を責めない</label><br>
-  <label><input type="checkbox" value="今日はこれで十分"> 今日はこれで十分</label><br>
-  <label><input type="checkbox" value="考えすぎない"> 考えすぎない</label><br>
+  <label><input type="checkbox" value="一人の時間"> 一人の時間</label>
+  <label><input type="checkbox" value="しっかり休む"> しっかり休む</label>
+  <label><input type="checkbox" value="何もしない"> 何もしない</label>
+  <label><input type="checkbox" value="気分転換"> 気分転換</label>
+  <label><input type="checkbox" value="話を聞いてもらう"> 話を聞いてもらう</label>
+  <label><input type="checkbox" value="そっとしておいてほしい"> そっとしておいてほしい</label>
 </section>
 
-
 <section>
-  <strong>今日のひとこと（自由メモ）</strong><br>
+  <strong>今日のひとこと（自由メモ）</strong>
   <textarea id="memo" style="width:100%;min-height:80px;"></textarea>
 </section>
 
@@ -177,12 +156,6 @@ input[type="checkbox"] {
   const today = new Date();
   document.getElementById("today").textContent =
     "📅 " + today.toLocaleDateString();
-
-  const wake = JSON.parse(localStorage.getItem("todayWake") || "null");
-  if (wake) {
-    document.getElementById("todayWake").textContent =
-      `🌅 今日の起床：${wake.time}`;
-  }
 
   function saveLog() {
     const mood = document.querySelector('input[name="mood"]:checked')?.value;
@@ -206,91 +179,68 @@ input[type="checkbox"] {
     renderLogs();
   }
 
-function renderLogs() {
-  const list = document.getElementById("logList");
-  list.innerHTML = "";
-  const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
+  function renderLogs() {
+    const list = document.getElementById("logList");
+    list.innerHTML = "";
+    const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
 
-  if (data.length === 0) return;
+    data.slice().reverse().forEach((e, i) => {
+      const realIndex = data.length - 1 - i;
+      const div = document.createElement("div");
+      div.className = "log";
 
-  data.slice().reverse().forEach((e, i) => {
-    const realIndex = data.length - 1 - i;
-    const div = document.createElement("div");
-    div.className = "log";
+      if (editingIndex === realIndex) {
+        div.innerHTML = `
+          <strong>${e.date}</strong><br>
+          <textarea id="editMemo" style="width:100%;min-height:100px;">${e.memo || ""}</textarea>
+          <br>
+          <button onclick="saveEdit(${realIndex})">保存</button>
+          <button onclick="cancelEdit()">キャンセル</button>
+        `;
+      } else {
+        div.innerHTML = `
+          <strong>${e.date}</strong><br>
+          気分：${e.mood || "-"}<br>
+          感情：${e.emotions.join("、")}<br>
+          必要：${e.needs.join("、")}<br>
+          📝 ${(e.memo || "").replace(/\n/g, "<br>")}
+          <br><br>
+          <button onclick="startEdit(${realIndex})">修正</button>
+          <button onclick="deleteLog(${realIndex})">削除</button>
+        `;
+      }
 
-    if (editingIndex === realIndex) {
-      div.innerHTML = `
-        <strong>${e.date}</strong><br>
-        📝 編集中<br>
-        <textarea id="editMemo" style="width:100%;min-height:100px;">${e.memo || ""}</textarea>
-        <br>
-        <button onclick="saveEdit(${realIndex})">保存</button>
-        <button onclick="cancelEdit()">キャンセル</button>
-      `;
-    } else {
-      div.innerHTML = `
-        <strong>${e.date}</strong><br>
-        気分：${e.mood || "-"}<br>
-        感情：${e.emotions.join("、")}<br>
-        対応：${e.needs.join("、")}<br>
-        📝 ${(e.memo || "").replace(/\n/g, "<br>")}
-        <br><br>
-        <button onclick="startEdit(${realIndex})">修正</button>
-        <button onclick="deleteLog(${realIndex})">削除</button>
-      `;
-    }
+      list.appendChild(div);
+    });
+  }
 
-    list.appendChild(div);
-  });
-}
+  function startEdit(index) {
+    editingIndex = index;
+    renderLogs();
+  }
 
+  function cancelEdit() {
+    editingIndex = null;
+    renderLogs();
+  }
 
+  function saveEdit(index) {
+    const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
+    data[index].memo = document.getElementById("editMemo").value;
+    localStorage.setItem("manualLogs", JSON.stringify(data));
+    editingIndex = null;
+    renderLogs();
+  }
+
+  function deleteLog(index) {
+    if (!confirm("この記録を削除しますか？")) return;
+    const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
+    data.splice(index, 1);
+    localStorage.setItem("manualLogs", JSON.stringify(data));
+    renderLogs();
+  }
 
   renderLogs();
-
-  function editLog(index) {
-  const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
-  const current = data[index];
-
-  const newMemo = prompt("メモを修正してください", current.memo || "");
-  if (newMemo === null) return; // キャンセル
-
-  current.memo = newMemo;
-  localStorage.setItem("manualLogs", JSON.stringify(data));
-  renderLogs();
-}
-
-function deleteLog(index) {
-  if (!confirm("この記録を削除しますか？")) return;
-
-  const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
-  data.splice(index, 1);
-  localStorage.setItem("manualLogs", JSON.stringify(data));
-  renderLogs();
-}
-
-/* 👇 ここから編集用（外に出す！） */
-
-function startEdit(index) {
-  editingIndex = index;
-  renderLogs();
-}
-
-function cancelEdit() {
-  editingIndex = null;
-  renderLogs();
-}
-
-function saveEdit(index) {
-  const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
-  const textarea = document.getElementById("editMemo");
-  data[index].memo = textarea.value;
-
-  localStorage.setItem("manualLogs", JSON.stringify(data));
-  editingIndex = null;
-  renderLogs();
-}
-
 </script>
 
 </body>
