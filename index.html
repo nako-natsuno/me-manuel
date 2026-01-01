@@ -44,7 +44,6 @@
       margin-bottom: 10px;
     }
 
-    /* 選択肢の余白を正しく管理 */
     label {
       display: block;
       margin-bottom: 6px;
@@ -53,74 +52,37 @@
 
     input[type="radio"],
     input[type="checkbox"] {
-      transform: scale(1.4);
+      transform: scale(1.3);
       margin-right: 8px;
     }
 
-    /* スマホ用調整 */
     @media (max-width: 600px) {
-      body {
-        font-size: 17px;
-      }
-
-      h1 {
-        font-size: 22px;
-      }
-
-      h2 {
-        font-size: 20px;
-      }
-
-      section strong {
-        font-size: 18px;
-      }
-
-      label {
-        font-size: 18px;
-        line-height: 1.8;
-      }
-
-      textarea {
-        font-size: 17px;
-      }
-
-      button {
-        font-size: 18px;
-        padding: 14px 16px;
-      }
-
-      .log {
-        font-size: 16px;
-      }
+      body { font-size: 17px; }
+      label { font-size: 18px; }
+      button { font-size: 18px; padding: 14px 16px; }
+      textarea { font-size: 17px; }
     }
   </style>
-<!-- Firebase（これだけ使う） -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-<script>
-  const firebaseConfig = {
-    apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
-    authDomain: "me-manuel.firebaseapp.com",
-    projectId: "me-manuel",
-    storageBucket: "me-manuel.firebasestorage.app",
-    messagingSenderId: "322422156686",
-    appId: "1:322422156686:web:0bd42d600451496d8e48df"
-  };
+  <!-- Firebase（compat版・そのまま使う） -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-</script>
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
+  authDomain: "me-manuel.firebaseapp.com",
+  projectId: "me-manuel",
+  storageBucket: "me-manuel.firebasestorage.app",
+  messagingSenderId: "322422156686",
+  appId: "1:322422156686:web:0bd42d600451496d8e48df"
+};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
 </head>
 
-<script>
-  alert("BOTTOM SCRIPT RUNNING");
-</script>
-</body>
-
 <body>
-    <h1 style="color:red;">DEBUG TEST</h1>
-    
 
 <nav style="margin-bottom:20px;">
   <a href="index.html">🏠 Home</a> |
@@ -141,12 +103,10 @@
 
 <section>
   <strong>今の感情（複数OK）</strong>
-
   <label><input type="checkbox" value="嬉しさ"> 嬉しさ</label>
   <label><input type="checkbox" value="安心"> 安心</label>
   <label><input type="checkbox" value="満足"> 満足</label>
   <label><input type="checkbox" value="感謝"> 感謝</label>
-
   <label><input type="checkbox" value="疲れ"> 疲れ</label>
   <label><input type="checkbox" value="不安"> 不安</label>
   <label><input type="checkbox" value="焦り"> 焦り</label>
@@ -155,7 +115,6 @@
 
 <section>
   <strong>今の自分に必要なこと</strong>
-
   <label><input type="checkbox" value="一人の時間"> 一人の時間</label>
   <label><input type="checkbox" value="しっかり休む"> しっかり休む</label>
   <label><input type="checkbox" value="何もしない"> 何もしない</label>
@@ -176,18 +135,17 @@
 
 <script>
   const USER_ID_KEY = "meManuelUserId";
-let userId = localStorage.getItem(USER_ID_KEY);
+  let userId = localStorage.getItem(USER_ID_KEY);
+  if (!userId) {
+    userId = crypto.randomUUID();
+    localStorage.setItem(USER_ID_KEY, userId);
+  }
 
-if (!userId) {
-  userId = crypto.randomUUID();
-  localStorage.setItem(USER_ID_KEY, userId);
-}
+  document.getElementById("today").textContent =
+    "📅 " + new Date().toLocaleDateString();
 
   let editingIndex = null;
-
-  const today = new Date();
-  document.getElementById("today").textContent =
-    "📅 " + today.toLocaleDateString();
+  let logsCache = [];
 
   async function saveLog() {
     const mood = document.querySelector('input[name="mood"]:checked')?.value;
@@ -195,101 +153,51 @@ if (!userId) {
     const needs = [...document.querySelectorAll('section:nth-of-type(3) input:checked')].map(e => e.value);
     const memo = document.getElementById("memo").value;
 
-    const entry = {
-      date: new Date().toLocaleString(),
-      mood,
-      emotions,
-      needs,
-      memo
-    };
-
-    const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
-    data.push(entry);
-    localStorage.setItem("manualLogs", JSON.stringify(data));
+    await db.collection("users")
+      .doc(userId)
+      .collection("manualLogs")
+      .add({
+        date: new Date().toISOString(),
+        mood,
+        emotions,
+        needs,
+        memo
+      });
 
     document.getElementById("memo").value = "";
+    loadLogs();
+  }
+
+  async function loadLogs() {
+    const snapshot = await db.collection("users")
+      .doc(userId)
+      .collection("manualLogs")
+      .orderBy("date")
+      .get();
+
+    logsCache = snapshot.docs.map(doc => doc.data());
     renderLogs();
   }
 
   function renderLogs() {
     const list = document.getElementById("logList");
     list.innerHTML = "";
-    const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
 
-    data.slice().reverse().forEach((e, i) => {
-      const realIndex = data.length - 1 - i;
+    logsCache.slice().reverse().forEach((e, i) => {
       const div = document.createElement("div");
       div.className = "log";
-
-      if (editingIndex === realIndex) {
-        div.innerHTML = `
-          <strong>${e.date}</strong><br>
-          <textarea id="editMemo" style="width:100%;min-height:100px;">${e.memo || ""}</textarea>
-          <br>
-          <button onclick="saveEdit(${realIndex})">保存</button>
-          <button onclick="cancelEdit()">キャンセル</button>
-        `;
-      } else {
-        div.innerHTML = `
-          <strong>${e.date}</strong><br>
-          気分：${e.mood || "-"}<br>
-          感情：${e.emotions.join("、")}<br>
-          必要：${e.needs.join("、")}<br>
-          📝 ${(e.memo || "").replace(/\n/g, "<br>")}
-          <br><br>
-          <button onclick="startEdit(${realIndex})">修正</button>
-          <button onclick="deleteLog(${realIndex})">削除</button>
-        `;
-      }
-
+      div.innerHTML = `
+        <strong>${new Date(e.date).toLocaleString()}</strong><br>
+        気分：${e.mood || "-"}<br>
+        感情：${(e.emotions || []).join("、")}<br>
+        必要：${(e.needs || []).join("、")}<br>
+        📝 ${(e.memo || "").replace(/\n/g, "<br>")}
+      `;
       list.appendChild(div);
     });
   }
 
-  function startEdit(index) {
-    editingIndex = index;
-    renderLogs();
-  }
-
-  function cancelEdit() {
-    editingIndex = null;
-    renderLogs();
-  }
-
-console.log("saveLog called");
-
-
-  function saveEdit(index) {
-    const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
-    data[index].memo = document.getElementById("editMemo").value;
-    localStorage.setItem("manualLogs", JSON.stringify(data));
-    editingIndex = null;
-    renderLogs();
-  }
-
-  function deleteLog(index) {
-    if (!confirm("この記録を削除しますか？")) return;
-    const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
-    data.splice(index, 1);
-    localStorage.setItem("manualLogs", JSON.stringify(data));
-    renderLogs();
-  }
-
   loadLogs();
-
-  async function loadLogs() {
-  const snapshot = await db
-    .collection("users")
-    .doc(userId)
-    .collection("manualLogs")
-    .orderBy("date")
-    .get();
-
-  const data = snapshot.docs.map(doc => doc.data());
-  localStorage.setItem("manualLogs", JSON.stringify(data));
-  renderLogs();
-}
-
 </script>
 
 </body>
