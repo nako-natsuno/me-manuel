@@ -20,11 +20,17 @@
   section {
     position: relative;
     z-index: 0;
-  }
+      pointer-events: none;
+}
+
+section * {
+  pointer-events: auto;
+}
 
   button {
     position: relative;
     z-index: 1;
+      pointer-events: auto;
   }
 
     nav a {
@@ -174,7 +180,9 @@ if (!userId) {
   let logsCache = [];
 
   async function saveLog() {
-    
+    console.log("✅ 保存ボタンが押されました");
+alert("保存ボタン反応");
+
     const mood = document.querySelector('input[name="mood"]:checked')?.value;
     const emotions = [...document.querySelectorAll('section:nth-of-type(2) input:checked')].map(e => e.value);
     const needs = [...document.querySelectorAll('section:nth-of-type(3) input:checked')].map(e => e.value);
