@@ -47,12 +47,11 @@ summary {
 
 .card-title {
   font-weight: bold;
-  flex: 1;
+  min-width: 160px;
 }
 
-.meta {
-  font-size: 12px;
-  color: #555;
+.state-select {
+  font-size: 13px;
 }
 
 .memo-preview {
@@ -63,28 +62,35 @@ summary {
   text-overflow: ellipsis;
 }
 
-.stamp-picker button {
-  font-size: 18px;
-  margin-right: 4px;
+.stamp-gauge {
+  display: flex;
+  gap: 4px;
 }
 
-.stamp-log {
-  margin-top: 6px;
-  font-size: 12px;
+.stamp-cell {
+  text-align: center;
+  font-size: 11px;
+  padding: 2px 4px;
+  border-radius: 6px;
+}
+
+.stamp-cell.done {
+  background: #d4f7dc;
 }
 
 .stamp {
   font-size: 18px;
-  margin-right: 2px;
+  display: block;
 }
 
 .edit-mode {
   display: none;
+  margin-top: 8px;
 }
 
 button {
   padding: 4px 8px;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .month-highlight textarea {
@@ -125,7 +131,7 @@ button {
   <div id="goalContainer"></div>
 </section>
 
-<!-- 🌕 月間ハイライト（折りたたみ） -->
+<!-- 🌕 月間ハイライト -->
 <details>
   <summary>🌕 月間ハイライト</summary>
   <div id="monthlyHighlights"></div>
@@ -136,7 +142,7 @@ button {
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* ===== Firebase 初期化 ===== */
+/* ===== Firebase ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
   authDomain: "me-manuel.firebaseapp.com",
@@ -217,14 +223,24 @@ mh.addEventListener("input", e => {
 /* ===== スタンプ ===== */
 function currentMonthKey() {
   const now = new Date();
-  return `2026-${String(now.getMonth()+1).padStart(2,"0")}`;
+  return {
+    key: `2026-${String(now.getMonth()+1).padStart(2,"0")}`,
+    date: now.toISOString().slice(0,10)
+  };
 }
 
 function renderStamps(stamps = {}) {
-  let html = "<strong>2026年</strong><br>";
+  let html = "";
   for (let m = 1; m <= 12; m++) {
     const key = `2026-${String(m).padStart(2,"0")}`;
-    html += `<span class="stamp">${stamps[key] || "▫️"}</span>`;
+    const stamp = stamps[key] || "▫️";
+    const done = stamp === "🎉" ? "done" : "";
+    html += `
+      <div class="stamp-cell ${done}">
+        ${m}月
+        <span class="stamp">${stamp}</span>
+      </div>
+    `;
   }
   return html;
 }
@@ -258,88 +274,87 @@ function renderGoals() {
 
     grouped[group].forEach(g => {
       const d = goalCache[g.id] || {};
-      const monthKey = currentMonthKey();
+      const { key, date } = currentMonthKey();
 
       const card = document.createElement("div");
       card.className = "goal-card";
 
       card.innerHTML = `
-        <div class="view-mode">
-          <div class="card-header">
-            <div class="card-title">${g.title}</div>
+        <div class="card-header">
+          <div class="card-title">${g.title}</div>
 
-            <div class="stamp-picker">
-              <button data-stamp="😆">😆</button>
-              <button data-stamp="😐">😐</button>
-              <button data-stamp="🎉">🎉</button>
-            </div>
-
-            <button class="edit-btn">編集</button>
-          </div>
-
-          <div class="meta">状態：${d.state || "未設定"}</div>
-          <div class="memo-preview">
-            ${(d.memo || "").length > 60
-              ? d.memo.slice(0,60) + "…"
-              : (d.memo || "")
-            }
-          </div>
-
-          <div class="stamp-log">
+          <div class="stamp-gauge">
             ${renderStamps(d.stamps)}
           </div>
-        </div>
 
-        <div class="edit-mode">
-          <strong>${g.title}</strong>
-
-          <select>
+          <select class="state-select">
             <option ${d.state==="意識中"?"selected":""}>意識中</option>
             <option ${d.state==="進行中"?"selected":""}>進行中</option>
             <option ${d.state==="一時停止"?"selected":""}>一時停止</option>
             <option ${d.state==="達成"?"selected":""}>達成</option>
           </select>
 
+          <button class="edit-btn">メモ</button>
+        </div>
+
+        <div class="memo-preview">
+          ${(d.memo || "").length > 60 ? d.memo.slice(0,60)+"…" : (d.memo || "")}
+        </div>
+
+        ${d.achievedAt ? `🎉 達成日：${d.achievedAt}` : ""}
+
+        <div class="edit-mode">
           <textarea>${d.memo || ""}</textarea>
-          <input type="date" value="${d.date || ""}">
           <button class="save-btn">保存</button>
         </div>
       `;
 
-      const view = card.querySelector(".view-mode");
-      const edit = card.querySelector(".edit-mode");
+      const stateSelect = card.querySelector(".state-select");
       const editBtn = card.querySelector(".edit-btn");
+      const editMode = card.querySelector(".edit-mode");
       const saveBtn = card.querySelector(".save-btn");
-      const stampBtns = card.querySelectorAll(".stamp-picker button");
-      const [sel, ta, dt] = edit.querySelectorAll("select, textarea, input");
+      const memoTa = card.querySelector("textarea");
+      const stampCells = card.querySelectorAll(".stamp-cell");
 
-      editBtn.onclick = () => {
-        view.style.display = "none";
-        edit.style.display = "block";
-      };
-
-      saveBtn.onclick = () => {
+      stateSelect.onchange = () => {
         goalRef.doc(g.id).set({
-          state: sel.value,
-          memo: ta.value,
-          date: dt.value,
-          stamps: d.stamps || {},
+          ...d,
+          state: stateSelect.value,
           updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
       };
 
-      stampBtns.forEach(btn => {
-        btn.onclick = () => {
-          const newStamps = {...(d.stamps || {})};
-          newStamps[monthKey] = btn.dataset.stamp;
+      stampCells.forEach(cell => {
+        cell.onclick = () => {
+          const stamp = prompt("😆 / ⛔️ / 🎉 のどれかを入力", "😆");
+          if (!stamp) return;
 
-          goalRef.doc(g.id).set({
+          const newData = {
             ...d,
-            stamps: newStamps,
+            stamps: { ...(d.stamps || {}), [key]: stamp },
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-          });
+          };
+
+          if (stamp === "🎉") {
+            newData.achievedAt = date;
+            newData.state = "達成";
+          }
+
+          goalRef.doc(g.id).set(newData);
         };
       });
+
+      editBtn.onclick = () => {
+        editMode.style.display = editMode.style.display === "block" ? "none" : "block";
+      };
+
+      saveBtn.onclick = () => {
+        goalRef.doc(g.id).set({
+          ...d,
+          memo: memoTa.value,
+          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      };
 
       details.appendChild(card);
     });
