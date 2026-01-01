@@ -142,7 +142,15 @@ button {
 
 <section>
   <strong>2026年のテーマ</strong><br>
-  整える・積み上げる・表現する
+  流れ星を掴み取る一年にする
+</section>
+
+<section>
+  <h2>🌱 なりたい姿</h2>
+  <p>
+    思考を深めスキルを磨き、自分の意見を持った芯のある人になる。<br>
+    打倒2019年のビジュ🪞💃
+  </p>
 </section>
 
 <section>
@@ -179,17 +187,47 @@ const highlightRef = db.collection("users").doc(userId).collection("highlights")
 
 /* ===== 目標定義 ===== */
 const goals = [
+  // 🍽 生活
   { id:"beer", title:"1年間ビール禁止", group:"🍽 生活" },
   { id:"pasta", title:"1年間パスタ禁止", group:"🍽 生活" },
-  { id:"natto", title:"迷ったら納豆ご飯＋味噌汁", group:"🍽 生活" },
-  { id:"cold", title:"寒くなったら体を動かす", group:"🍽 生活" },
+  { id:"natto", title:"家で迷ったら納豆ご飯と味噌汁", group:"🍽 生活" },
+  { id:"cold_move", title:"寒くなったら体を動かす", group:"🍽 生活" },
 
-  { id:"weight", title:"ベスト体型48kg", group:"💪 健康" },
-  { id:"posture", title:"脚を組まない", group:"💪 健康" },
-  { id:"sweat", title:"汗をかく", group:"💪 健康" },
-  { id:"face", title:"フェイスパック習慣", group:"💪 健康" },
-  { id:"early", title:"早起き", group:"💪 健康" }
+  // 💪 健康・習慣
+  { id:"weight", title:"ベスコン体型の48kgになる", group:"💪 健康" },
+  { id:"no_cross", title:"脚を組まない", group:"💪 健康" },
+  { id:"sweat", title:"汗をかく（歩く／筋トレ／湯船）", group:"💪 健康" },
+  { id:"facepack", title:"フェイスパックを習慣化", group:"💪 健康" },
+  { id:"early", title:"早起きを習慣化", group:"💪 健康" },
+
+  // 💰 お金
+  { id:"asset", title:"資産400万円", group:"💰 お金" },
+  { id:"sidejob", title:"副業で年間5万円", group:"💰 お金" },
+  { id:"ai_money", title:"AIを使ってお金を稼ぐ", group:"💰 お金" },
+  { id:"stocks", title:"個別株の投資を始める", group:"💰 お金" },
+  { id:"clothes", title:"服は1買い1捨て", group:"💰 お金" },
+
+  // 📚 学び
+  { id:"fp2", title:"FP2級合格", group:"📚 学び" },
+  { id:"toeic", title:"TOEIC700点", group:"📚 学び" },
+  { id:"english", title:"英語で道案内できる", group:"📚 学び" },
+  { id:"read50", title:"年間読書50冊", group:"📚 学び" },
+  { id:"news", title:"ニュースチェックを習慣化", group:"📚 学び" },
+  { id:"reading_app", title:"読書通帳をアプリで作る", group:"📚 学び" },
+  { id:"memory", title:"記憶力を高める", group:"📚 学び" },
+
+  // ✍️ 記録・表現
+  { id:"diary", title:"日記や記録を習慣化", group:"✍️ 表現" },
+  { id:"memo", title:"メモを取る（アイデア・考え・気づき）", group:"✍️ 表現" },
+  { id:"sns", title:"SNSやnote発信をものにする", group:"✍️ 表現" },
+  { id:"manual", title:"自分の取説をつくる（Me Manuel）", group:"✍️ 表現" },
+
+  // 🤝 人・内面
+  { id:"friends", title:"趣味の友達をつくる", group:"🤝 人" },
+  { id:"mood", title:"自分の機嫌を自分で取れるようになる", group:"🤝 人" },
+  { id:"likes", title:"趣味嗜好をパッと言えるようになる", group:"🤝 人" }
 ];
+
 
 /* ===== ユーティリティ ===== */
 function monthKey() {
