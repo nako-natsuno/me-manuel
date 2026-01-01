@@ -3,110 +3,33 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-
   <title>🌅 Wake Up Log</title>
 
-  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
   <link rel="icon" href="icon.png">
 
+  <!-- Firebase（compat） -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+const firebaseConfig = {
+  apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
+  authDomain: "me-manuel.firebaseapp.com",
+  projectId: "me-manuel",
+  storageBucket: "me-manuel.firebasestorage.app",
+  messagingSenderId: "322422156686",
+  appId: "1:322422156686:web:0bd42d600451496d8e48df"
+};
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+  </script>
+
   <style>
-    body {
-      font-family: sans-serif;
-      background: #f0f6ff;
-      padding: 20px;
-      line-height: 1.6;
-    }
-
-    h1 {
-      margin-top: 0;
-    }
-
-    .wake-button {
-      font-size: 28px;
-      padding: 30px;
-      width: 100%;
-      border-radius: 16px;
-      border: none;
-      background: #ffb347;
-      cursor: pointer;
-      margin-bottom: 20px;
-    }
-
-    button {
-      font-size: 14px;
-      padding: 8px 12px;
-      border-radius: 6px;
-      border: none;
-      cursor: pointer;
-    }
-
-    button.delete {
-      background: #d9534f;
-      color: white;
-    }
-
-    .box {
-      background: white;
-      padding: 12px;
-      margin-bottom: 10px;
-      border-radius: 8px;
-    }
-
-    .log {
-      background: white;
-      padding: 10px;
-      margin-top: 10px;
-      border-radius: 8px;
-    }
-
-    /* 横並びレイアウト */
-    .wake-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-top: 6px;
-    }
-
-    /* 小さい削除ボタン */
-    button.small {
-      font-size: 12px;
-      padding: 4px 8px;
-      border-radius: 4px;
-    }
-
-    input[type="time"] {
-      font-size: 14px;
-    }
-
-    /* スマホ用調整 */
-    @media (max-width: 600px) {
-      body {
-        font-size: 17px;
-      }
-
-      h1 {
-        font-size: 24px;
-      }
-
-      .wake-button {
-        font-size: 32px;
-        padding: 36px;
-      }
-
-      .log, .box {
-        font-size: 16px;
-      }
-
-      input[type="time"] {
-        font-size: 18px;
-      }
-
-      /* 👇 ここで small を上書き（重要） */
-      button.small {
-        font-size: 11px;
-        padding: 4px 6px;
-      }
-    }
+    body { font-family: sans-serif; padding: 20px; background: #f0f6ff; }
+    .wake-button { font-size: 28px; padding: 30px; width: 100%; border-radius: 16px; }
+    .box, .log { background: white; padding: 12px; margin-bottom: 10px; border-radius: 8px; }
+    .wake-row { display: flex; gap: 10px; align-items: center; }
+    button.delete { background: #d9534f; color: white; }
   </style>
 </head>
 
@@ -129,117 +52,124 @@
 <div id="wakeList"></div>
 
 <script>
-  const TARGET_TIME = "06:00";
-  const today = new Date();
+/* ========= 共通 userId ========= */
+const USER_ID_KEY = "meManuelUserId";
 
-  document.getElementById("today").textContent =
-    "📅 " +
-    today.getFullYear() + "年" +
-    (today.getMonth() + 1) + "月" +
-    today.getDate() + "日";
+function generateId() {
+  return "xxxxxx-xxxxxx".replace(/x/g, () =>
+    Math.floor(Math.random() * 16).toString(16)
+  );
+}
 
-  function logWake() {
-    const now = new Date();
-    const entry = {
-      date: now.toISOString().slice(0, 10),
-      time: now.toTimeString().slice(0, 5)
-    };
+let userId = localStorage.getItem(USER_ID_KEY);
+if (!userId) {
+  userId = generateId();
+  localStorage.setItem(USER_ID_KEY, userId);
+}
 
-    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
-    data.push(entry);
-    localStorage.setItem("wakeLogs", JSON.stringify(data));
-    localStorage.setItem("todayWake", JSON.stringify(entry));
+/* ========= 日付表示 ========= */
+const today = new Date();
+document.getElementById("today").textContent =
+  "📅 " + today.toLocaleDateString();
 
-    renderWakeLogs();
-  }
+/* ========= Firestore参照 ========= */
+const wakeRef = db
+  .collection("users")
+  .doc(userId)
+  .collection("wakeLogs");
 
-  function deleteWake(index) {
-    if (!confirm("この起床ログを削除しますか？")) return;
+/* ========= 起床記録 ========= */
+async function logWake() {
+  const now = new Date();
+  await wakeRef.add({
+    date: now.toISOString().slice(0, 10),
+    time: now.toTimeString().slice(0, 5),
+    createdAt: firebase.firestore.FieldValue.serverTimestamp()
+  });
+  loadWakeLogs();
+}
 
-    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
-    data.splice(index, 1);
-    localStorage.setItem("wakeLogs", JSON.stringify(data));
-    renderWakeLogs();
-  }
+/* ========= 時刻変換 ========= */
+function timeToMinutes(t) {
+  const [h, m] = t.split(":").map(Number);
+  return h * 60 + m;
+}
 
-  function updateTime(index, newTime) {
-    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
-    data[index].time = newTime;
-    localStorage.setItem("wakeLogs", JSON.stringify(data));
-    renderWakeLogs();
-  }
+/* ========= 描画 ========= */
+let wakeCache = [];
 
-  function timeToMinutes(t) {
-    const [h, m] = t.split(":").map(Number);
-    return h * 60 + m;
-  }
-
-  function renderAverage(data) {
-    if (data.length === 0) {
-      document.getElementById("averageTime").textContent =
-        "📊 平均起床時間：データなし";
-      return;
-    }
-
-    const avg =
-      Math.round(data.reduce((s, e) => s + timeToMinutes(e.time), 0) / data.length);
-
-    document.getElementById("averageTime").textContent =
-      `📊 平均起床時間：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
-  }
-
-  function renderMonthlyAverage(data) {
-    const thisMonth = today.toISOString().slice(0, 7);
-    const monthData = data.filter(d => d.date.startsWith(thisMonth));
-
-    if (monthData.length === 0) {
-      document.getElementById("monthlyAverage").textContent =
-        "📈 今月の平均起床：データなし";
-      return;
-    }
-
-    const avg =
-      Math.round(monthData.reduce((s, e) => s + timeToMinutes(e.time), 0) / monthData.length);
-
-    document.getElementById("monthlyAverage").textContent =
-      `📈 今月の平均起床：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
-  }
-
-  function renderWakeLogs() {
-    const list = document.getElementById("wakeList");
-    list.innerHTML = "";
-
-    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
-    renderAverage(data);
-    renderMonthlyAverage(data);
-
-    if (data.length === 0) {
-      list.textContent = "まだ起床ログはありません。";
-      return;
-    }
-
-    const targetMin = timeToMinutes(TARGET_TIME);
-
-    data.slice().reverse().forEach((entry, i) => {
-      const realIndex = data.length - 1 - i;
-      const isEarly = timeToMinutes(entry.time) <= targetMin;
-
-      const div = document.createElement("div");
-      div.className = "log";
-      div.innerHTML = `
-        <strong>${entry.date}</strong> ${isEarly ? "🌟" : ""}
-        <div class="wake-row">
-          <input type="time" value="${entry.time}"
-            onblur="updateTime(${realIndex}, this.value)">
-          <button class="delete small"
-            onclick="deleteWake(${realIndex})">削除</button>
-        </div>
-      `;
-      list.appendChild(div);
-    });
-  }
-
+async function loadWakeLogs() {
+  const snapshot = await wakeRef.orderBy("date").get();
+  wakeCache = snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  }));
   renderWakeLogs();
+}
+
+function renderWakeLogs() {
+  const list = document.getElementById("wakeList");
+  list.innerHTML = "";
+
+  if (wakeCache.length === 0) {
+    list.textContent = "まだ起床ログはありません。";
+    return;
+  }
+
+  renderAverage(wakeCache);
+  renderMonthlyAverage(wakeCache);
+
+  wakeCache.slice().reverse().forEach(e => {
+    const div = document.createElement("div");
+    div.className = "log";
+    div.innerHTML = `
+      <strong>${e.date}</strong>
+      <div class="wake-row">
+        <input type="time" value="${e.time}"
+          onchange="updateTime('${e.id}', this.value)">
+        <button class="delete"
+          onclick="deleteWake('${e.id}')">削除</button>
+      </div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+/* ========= 更新・削除 ========= */
+async function updateTime(id, newTime) {
+  await wakeRef.doc(id).update({ time: newTime });
+  loadWakeLogs();
+}
+
+async function deleteWake(id) {
+  if (!confirm("この起床ログを削除しますか？")) return;
+  await wakeRef.doc(id).delete();
+  loadWakeLogs();
+}
+
+/* ========= 平均 ========= */
+function renderAverage(data) {
+  const avg =
+    Math.round(data.reduce((s, e) => s + timeToMinutes(e.time), 0) / data.length);
+
+  document.getElementById("averageTime").textContent =
+    `📊 平均起床：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
+}
+
+function renderMonthlyAverage(data) {
+  const month = today.toISOString().slice(0, 7);
+  const m = data.filter(e => e.date.startsWith(month));
+  if (m.length === 0) return;
+
+  const avg =
+    Math.round(m.reduce((s, e) => s + timeToMinutes(e.time), 0) / m.length);
+
+  document.getElementById("monthlyAverage").textContent =
+    `📈 今月の平均：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
+}
+
+/* ========= 初期読み込み ========= */
+loadWakeLogs();
 </script>
 
 </body>
