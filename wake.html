@@ -3,12 +3,12 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Wake Up Log</title>
 
-    <!-- アイコン設定（重要） -->
+  <title>🌅 Wake Up Log</title>
+
   <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
   <link rel="icon" href="icon.png">
-  
+
   <style>
     body {
       font-family: sans-serif;
@@ -16,6 +16,11 @@
       padding: 20px;
       line-height: 1.6;
     }
+
+    h1 {
+      margin-top: 0;
+    }
+
     .wake-button {
       font-size: 28px;
       padding: 30px;
@@ -26,6 +31,7 @@
       cursor: pointer;
       margin-bottom: 20px;
     }
+
     button {
       font-size: 14px;
       padding: 8px 12px;
@@ -33,86 +39,82 @@
       border: none;
       cursor: pointer;
     }
+
     button.delete {
       background: #d9534f;
       color: white;
     }
-    .log, .box {
+
+    .box {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
+
+    .log {
       background: white;
       padding: 10px;
       margin-top: 10px;
       border-radius: 8px;
     }
+
+    /* 横並びレイアウト */
+    .wake-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    /* 小さい削除ボタン */
+    button.small {
+      font-size: 12px;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+
     input[type="time"] {
       font-size: 14px;
     }
-/* 起床ログ 横並び */
-.wake-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 6px;
-}
 
-/* 削除ボタンを小さく */
-button.small {
-  font-size: 12px;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
+    /* スマホ用調整 */
+    @media (max-width: 600px) {
+      body {
+        font-size: 17px;
+      }
 
-/* スマホ用 微調整 */
-@media (max-width: 600px) {
-  button.small {
-    font-size: 11px;
-    padding: 4px 6px;
-  }
-}
+      h1 {
+        font-size: 24px;
+      }
 
-@media (max-width: 600px) {
-  body {
-    font-size: 17px;
-  }
+      .wake-button {
+        font-size: 32px;
+        padding: 36px;
+      }
 
-  h1 {
-    font-size: 24px;
-  }
+      .log, .box {
+        font-size: 16px;
+      }
 
-  h2 {
-    font-size: 20px;
-  }
+      input[type="time"] {
+        font-size: 18px;
+      }
 
-  button {
-    font-size: 20px;
-    padding: 18px 20px;
-  }
-
-  .wake-button {
-    font-size: 32px;
-    padding: 36px;
-  }
-
-  .log, .box {
-    font-size: 16px;
-  }
-
-  input[type="time"] {
-    font-size: 18px;
-  }
-}
-input[type="radio"],
-input[type="checkbox"] {
-  transform: scale(1.4);
-  margin-right: 8px;
-}
-
+      /* 👇 ここで small を上書き（重要） */
+      button.small {
+        font-size: 11px;
+        padding: 4px 6px;
+      }
+    }
   </style>
 </head>
+
 <body>
 
 <nav style="margin-bottom:20px;">
   <a href="index.html">🏠 Home</a> |
-  <a href="wake.html">🌅 Wake Up</a>
+  <a href="wake.html">🌅 Wake Up Log</a>
 </nav>
 
 <h1>🌅 Wake Up Log</h1>
@@ -127,63 +129,45 @@ input[type="checkbox"] {
 <div id="wakeList"></div>
 
 <script>
-  const TARGET_TIME = "06:00"; // 目標起床時間
-
+  const TARGET_TIME = "06:00";
   const today = new Date();
+
   document.getElementById("today").textContent =
-    "📅 " + today.getFullYear() + "年" +
+    "📅 " +
+    today.getFullYear() + "年" +
     (today.getMonth() + 1) + "月" +
     today.getDate() + "日";
 
   function logWake() {
     const now = new Date();
     const entry = {
-      date: now.toISOString().slice(0,10), // YYYY-MM-DD
-      time: now.toTimeString().slice(0,5)  // HH:MM
+      date: now.toISOString().slice(0, 10),
+      time: now.toTimeString().slice(0, 5)
     };
 
     const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
     data.push(entry);
     localStorage.setItem("wakeLogs", JSON.stringify(data));
-
-    // ホーム用（今日の起床）
     localStorage.setItem("todayWake", JSON.stringify(entry));
 
     renderWakeLogs();
   }
 
- function deleteWake(index) {
-  if (!confirm("この起床ログを削除しますか？")) return;
+  function deleteWake(index) {
+    if (!confirm("この起床ログを削除しますか？")) return;
 
-  const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
-  const removed = data[index];
-  data.splice(index, 1);
-  localStorage.setItem("wakeLogs", JSON.stringify(data));
-
-  // 今日の起床を消したなら todayWake も消す
-  const todayStr = new Date().toISOString().slice(0,10);
-  if (removed.date === todayStr) {
-    localStorage.removeItem("todayWake");
+    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
+    data.splice(index, 1);
+    localStorage.setItem("wakeLogs", JSON.stringify(data));
+    renderWakeLogs();
   }
 
-  renderWakeLogs();
-}
-
-
-function updateTime(index, newTime) {
-  const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
-  data[index].time = newTime;
-  localStorage.setItem("wakeLogs", JSON.stringify(data));
-
-  // 今日の起床なら todayWake も更新
-  const todayStr = new Date().toISOString().slice(0,10);
-  if (data[index].date === todayStr) {
-    localStorage.setItem("todayWake", JSON.stringify(data[index]));
+  function updateTime(index, newTime) {
+    const data = JSON.parse(localStorage.getItem("wakeLogs") || "[]");
+    data[index].time = newTime;
+    localStorage.setItem("wakeLogs", JSON.stringify(data));
+    renderWakeLogs();
   }
-
-  renderWakeLogs();
-}
-
 
   function timeToMinutes(t) {
     const [h, m] = t.split(":").map(Number);
@@ -196,24 +180,29 @@ function updateTime(index, newTime) {
         "📊 平均起床時間：データなし";
       return;
     }
+
     const avg =
       Math.round(data.reduce((s, e) => s + timeToMinutes(e.time), 0) / data.length);
+
     document.getElementById("averageTime").textContent =
-      `📊 平均起床時間：${String(Math.floor(avg/60)).padStart(2,"0")}:${String(avg%60).padStart(2,"0")}`;
+      `📊 平均起床時間：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
   }
 
   function renderMonthlyAverage(data) {
-    const thisMonth = today.toISOString().slice(0,7);
+    const thisMonth = today.toISOString().slice(0, 7);
     const monthData = data.filter(d => d.date.startsWith(thisMonth));
+
     if (monthData.length === 0) {
       document.getElementById("monthlyAverage").textContent =
-        "📈 今月の平均：データなし";
+        "📈 今月の平均起床：データなし";
       return;
     }
+
     const avg =
       Math.round(monthData.reduce((s, e) => s + timeToMinutes(e.time), 0) / monthData.length);
+
     document.getElementById("monthlyAverage").textContent =
-      `📈 今月の平均起床：${String(Math.floor(avg/60)).padStart(2,"0")}:${String(avg%60).padStart(2,"0")}`;
+      `📈 今月の平均起床：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
   }
 
   function renderWakeLogs() {
@@ -237,16 +226,15 @@ function updateTime(index, newTime) {
 
       const div = document.createElement("div");
       div.className = "log";
-    div.innerHTML = `
-  <strong>${entry.date}</strong>
-  ${isEarly ? "🌟" : ""}
-  <div class="wake-row">
-    <input type="time" value="${entry.time}"
-      onchange="updateTime(${realIndex}, this.value)">
-    <button class="delete small"
-      onclick="deleteWake(${realIndex})">削除</button>
-  </div>
-`;
+      div.innerHTML = `
+        <strong>${entry.date}</strong> ${isEarly ? "🌟" : ""}
+        <div class="wake-row">
+          <input type="time" value="${entry.time}"
+            onblur="updateTime(${realIndex}, this.value)">
+          <button class="delete small"
+            onclick="deleteWake(${realIndex})">削除</button>
+        </div>
+      `;
       list.appendChild(div);
     });
   }
