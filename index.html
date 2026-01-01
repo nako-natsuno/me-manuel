@@ -181,7 +181,10 @@ if (!userId) {
   let editingIndex = null;
   let logsCache = [];
 
-  async function saveLog() {
+async function saveLog() {
+  try {
+    alert("保存処理を開始します");
+
     const mood = document.querySelector('input[name="mood"]:checked')?.value;
     const emotions = [...document.querySelectorAll('section:nth-of-type(2) input:checked')].map(e => e.value);
     const needs = [...document.querySelectorAll('section:nth-of-type(3) input:checked')].map(e => e.value);
@@ -198,9 +201,13 @@ if (!userId) {
         memo
       });
 
-    document.getElementById("memo").value = "";
-    loadLogs();
+    alert("✅ 保存成功");
+
+  } catch (e) {
+    alert("❌ エラー発生：" + e.message);
+    console.error(e);
   }
+}
 
   async function loadLogs() {
     const snapshot = await db.collection("users")
