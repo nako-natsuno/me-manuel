@@ -111,7 +111,7 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 </script>
-
+</head>
 
 <body>
 
@@ -182,7 +182,7 @@ if (!userId) {
   document.getElementById("today").textContent =
     "📅 " + today.toLocaleDateString();
 
-  function saveLog() {
+  async function saveLog() {
     const mood = document.querySelector('input[name="mood"]:checked')?.value;
     const emotions = [...document.querySelectorAll('section:nth-of-type(2) input:checked')].map(e => e.value);
     const needs = [...document.querySelectorAll('section:nth-of-type(3) input:checked')].map(e => e.value);
@@ -248,6 +248,9 @@ if (!userId) {
     editingIndex = null;
     renderLogs();
   }
+
+console.log("saveLog called");
+
 
   function saveEdit(index) {
     const data = JSON.parse(localStorage.getItem("manualLogs") || "[]");
