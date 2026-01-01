@@ -94,24 +94,25 @@
       }
     }
   </style>
+<script type="module">
   // Import the functions you need from the SDKs you need
-import { initializeApp } from "firebase/app";
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/12.7.0/firebase-app.js";
+  // TODO: Add SDKs for Firebase products that you want to use
+  // https://firebase.google.com/docs/web/setup#available-libraries
 
-// Your web app's Firebase configuration
-const firebaseConfig = {
-  apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
-  authDomain: "me-manuel.firebaseapp.com",
-  projectId: "me-manuel",
-  storageBucket: "me-manuel.firebasestorage.app",
-  messagingSenderId: "322422156686",
-  appId: "1:322422156686:web:0bd42d600451496d8e48df"
-};
+  // Your web app's Firebase configuration
+  const firebaseConfig = {
+    apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
+    authDomain: "me-manuel.firebaseapp.com",
+    projectId: "me-manuel",
+    storageBucket: "me-manuel.firebasestorage.app",
+    messagingSenderId: "322422156686",
+    appId: "1:322422156686:web:0bd42d600451496d8e48df"
+  };
 
-// Initialize Firebase
-const app = initializeApp(firebaseConfig);
-</head>
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+</script>
 
 <body>
 
@@ -264,7 +265,7 @@ if (!userId) {
     localStorage.setItem("manualLogs", JSON.stringify(data));
     renderLogs();
   }
-  
+
   loadLogs();
 
   async function loadLogs() {
