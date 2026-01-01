@@ -64,6 +64,28 @@
       button { font-size: 18px; padding: 14px 16px; }
       textarea { font-size: 17px; }
     }
+
+    .goal-link {
+  display: block;
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.goal-link-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.goal-link-desc {
+  font-size: 14px;
+  color: #666;
+}
+
   </style>
 
   <!-- Firebase（Firestoreのみ） -->
@@ -91,11 +113,21 @@
 <body>
 
 <nav style="margin-bottom:20px;">
-  <a href="index.html">🏠 Home</a> |
-  <a href="wake.html">🌅 Wake Up Log</a>
+  <a href="wake.html">🌅 Wake</a> |
+  <a href="index.html">📝 Log</a> |
+  <a href="goals2026.html">🎯 2026</a>
 </nav>
 
 <h1>🐈 Me Manuel</h1>
+
+<a href="goals2026.html" class="goal-link">
+  <div class="goal-link-title">🎯 2026年の指針</div>
+  <div class="goal-link-desc">
+    迷ったときに戻る場所
+  </div>
+</a>
+
+
 <p id="today"></p>
 
 <section>

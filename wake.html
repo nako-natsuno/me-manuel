@@ -67,6 +67,28 @@
   cursor: default;
 }
 
+.goal-link {
+  display: block;
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.goal-link-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.goal-link-desc {
+  font-size: 14px;
+  color: #666;
+}
+
+
   </style>
 
   <!-- Firebase（Firestoreのみ） -->
@@ -94,12 +116,21 @@
 <body>
 
 <nav style="margin-bottom:20px;">
-  <a href="index.html">🏠 Home</a> |
-  <a href="wake.html">🌅 Wake Up Log</a>
+  <a href="wake.html">🌅 Wake</a> |
+  <a href="index.html">📝 Log</a> |
+  <a href="goals2026.html">🎯 2026</a>
 </nav>
 
 <h1>🌅 Wake Up Log</h1>
 <p id="today"></p>
+
+<a href="goals2026.html" class="goal-link">
+  <div class="goal-link-title">🎯 2026年の指針を見る</div>
+  <div class="goal-link-desc">
+    整える・積み上げる・表現する
+  </div>
+</a>
+
 
 <button class="wake-button" id="wakeBtn">🌅 起きた！</button>
 
@@ -129,10 +160,6 @@
   async function logWake() {
     if (hasWokenToday()) return;
 
-    // 📳 軽いバイブ（iPhone対応）
-    if (navigator.vibrate) {
-      navigator.vibrate(30);
-    }
 
     const now = new Date();
     await wakeRef.add({
