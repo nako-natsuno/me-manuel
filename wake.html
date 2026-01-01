@@ -105,4 +105,112 @@
     "📅 " + today.toLocaleDateString();
 
   const wakeRef = db
-    .collec
+    .collection("users")
+    .doc(userId)
+    .collection("wakeLogs");
+
+  let wakeCache = [];
+
+  /* 🌅 起床ログ追加 */
+  async function logWake() {
+    const now = new Date();
+    await wakeRef.add({
+      date: now.toISOString().slice(0, 10),
+      time: now.toTimeString().slice(0, 5),
+      createdAt: now.toISOString()
+    });
+  }
+
+  document.getElementById("wakeBtn")
+    .addEventListener("click", logWake);
+
+  /* 🔄 リアルタイム同期 */
+  function startRealtimeWakeLogs() {
+    wakeRef
+      .orderBy("date")
+      .onSnapshot(snapshot => {
+        wakeCache = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderWakeLogs();
+        console.log("Wake realtime:", wakeCache.length);
+      });
+  }
+
+  /* 🖼 描画 */
+  function renderWakeLogs() {
+    const list = document.getElementById("wakeList");
+    list.innerHTML = "";
+
+    if (wakeCache.length === 0) {
+      list.textContent = "まだ起床ログはありません。";
+      return;
+    }
+
+    renderAverage(wakeCache);
+    renderMonthlyAverage(wakeCache);
+
+    wakeCache.slice().reverse().forEach(e => {
+      const div = document.createElement("div");
+      div.className = "log";
+      div.innerHTML = `
+        <strong>${e.date}</strong>
+        <div class="wake-row">
+          <input type="time" value="${e.time}"
+            onchange="updateTime('${e.id}', this.value)">
+          <button class="delete"
+            onclick="deleteWake('${e.id}')">削除</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  /* ✏️ 更新 */
+  async function updateTime(id, newTime) {
+    await wakeRef.doc(id).update({ time: newTime });
+  }
+
+  /* 🗑 削除 */
+  async function deleteWake(id) {
+    if (!confirm("この起床ログを削除しますか？")) return;
+    await wakeRef.doc(id).delete();
+  }
+
+  /* ⏱ 計算 */
+  function timeToMinutes(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function renderAverage(data) {
+    const avg =
+      Math.round(
+        data.reduce((s, e) => s + timeToMinutes(e.time), 0) / data.length
+      );
+
+    document.getElementById("averageTime").textContent =
+      `📊 平均起床：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
+  }
+
+  function renderMonthlyAverage(data) {
+    const month = today.toISOString().slice(0, 7);
+    const m = data.filter(e => e.date.startsWith(month));
+    if (m.length === 0) return;
+
+    const avg =
+      Math.round(
+        m.reduce((s, e) => s + timeToMinutes(e.time), 0) / m.length
+      );
+
+    document.getElementById("monthlyAverage").textContent =
+      `📈 今月の平均：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
+  }
+
+  /* 🔥 初期化 */
+  startRealtimeWakeLogs();
+</script>
+
+</body>
+</html>

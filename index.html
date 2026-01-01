@@ -64,15 +64,9 @@
       button { font-size: 18px; padding: 14px 16px; }
       textarea { font-size: 17px; }
     }
-
-    #saveArea button {
-      width: 100%;
-      font-size: 20px;
-      padding: 16px;
-    }
   </style>
 
-  <!-- Firebase（Firestoreのみ使用） -->
+  <!-- Firebase（Firestoreのみ） -->
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
@@ -139,7 +133,6 @@
   <strong>今日のひとこと（自由メモ）</strong>
   <textarea id="memo" style="width:100%;min-height:80px;"></textarea>
 
-  <!-- 保存ボタンをここに配置 -->
   <div style="margin-top:15px;">
     <button id="saveBtn" style="width:100%;font-size:18px;padding:14px;">
       保存する
@@ -154,15 +147,15 @@
   document.getElementById("today").textContent =
     "📅 " + new Date().toLocaleDateString();
 
-  let logsCache = [];
-  let editingId = null;
-
   const logsRef = db
     .collection("users")
     .doc(userId)
     .collection("manualLogs");
 
-  /* 保存 */
+  let logsCache = [];
+  let editingId = null;
+
+  /* 💾 保存 */
   async function saveLog() {
     const mood =
       document.querySelector('input[name="mood"]:checked')?.value || null;
@@ -178,35 +171,33 @@
     const memo = document.getElementById("memo").value;
 
     if (editingId) {
-      await logsRef.doc(editingId).update({
-        mood, emotions, needs, memo
-      });
+      await logsRef.doc(editingId).update({ mood, emotions, needs, memo });
       editingId = null;
     } else {
       await logsRef.add({
-        mood,
-        emotions,
-        needs,
-        memo,
+        mood, emotions, needs, memo,
         date: new Date().toISOString()
       });
     }
 
     resetForm();
-    loadLogs();
   }
 
-  /* 読み込み */
-  async function loadLogs() {
-    const snapshot = await logsRef.orderBy("date").get();
-    logsCache = snapshot.docs.map(doc => ({
-      id: doc.id,
-      ...doc.data()
-    }));
-    renderLogs();
+  /* 🔄 リアルタイム同期（ここが肝） */
+  function startRealtimeLogs() {
+    logsRef
+      .orderBy("date")
+      .onSnapshot(snapshot => {
+        logsCache = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderLogs();
+        console.log("Realtime update:", logsCache.length);
+      });
   }
 
-  /* 表示 */
+  /* 🖼 表示 */
   function renderLogs() {
     const list = document.getElementById("logList");
     list.innerHTML = "";
@@ -228,23 +219,18 @@
     });
   }
 
-  /* 編集 */
   function editLog(id) {
     const l = logsCache.find(e => e.id === id);
     if (!l) return;
-
     editingId = id;
     document.getElementById("memo").value = l.memo || "";
   }
 
-  /* 削除 */
   async function deleteLog(id) {
     if (!confirm("このログを削除しますか？")) return;
     await logsRef.doc(id).delete();
-    loadLogs();
   }
 
-  /* リセット */
   function resetForm() {
     document.querySelectorAll("input").forEach(e => e.checked = false);
     document.getElementById("memo").value = "";
@@ -253,8 +239,8 @@
   document.getElementById("saveBtn")
     .addEventListener("click", saveLog);
 
-  /* 初期読み込み */
-  loadLogs();
+  /* 🔥 初期化 */
+  startRealtimeLogs();
 </script>
 
 </body>
