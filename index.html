@@ -78,6 +78,13 @@ section * {
       button { font-size: 18px; padding: 14px 16px; }
       textarea { font-size: 17px; }
     }
+
+    #saveArea {
+  position: relative;
+  z-index: 9999;
+  margin-top: 20px;
+}
+
   </style>
 
   <!-- Firebase（compat版・そのまま使う） -->
@@ -144,14 +151,9 @@ const firebaseConfig = {
   <textarea id="memo" style="width:100%;min-height:80px;"></textarea>
 </section>
 
-<button
-  type="button"
-  onclick="saveLog()"
->
-  保存する
-</button>
-
-
+<div id="saveArea">
+  <button type="button" onclick="saveLog()">保存する</button>
+</div>
 
 <h2>📜 これまでの記録</h2>
 <div id="logList"></div>
