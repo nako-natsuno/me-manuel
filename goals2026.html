@@ -15,19 +15,13 @@ body {
   padding: 20px;
   line-height: 1.7;
 }
+
 nav a { margin-right: 10px; }
 
-section {
+section, details {
   background: #fff;
   padding: 16px;
   border-radius: 10px;
-  margin-bottom: 16px;
-}
-
-details {
-  background: #fff;
-  border-radius: 10px;
-  padding: 12px;
   margin-bottom: 16px;
 }
 
@@ -40,17 +34,24 @@ summary {
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 12px;
-  margin: 12px 0;
+  margin: 10px 0;
   background: #fafafa;
 }
 
-.view-mode strong {
-  display: block;
-  margin-bottom: 4px;
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.card-title {
+  font-weight: bold;
+  flex: 1;
 }
 
 .meta {
-  font-size: 13px;
+  font-size: 12px;
   color: #555;
 }
 
@@ -62,25 +63,28 @@ summary {
   text-overflow: ellipsis;
 }
 
-.stamp-row {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 4px;
-  align-items: center;
+.stamp-picker button {
+  font-size: 18px;
+  margin-right: 4px;
+}
+
+.stamp-log {
   margin-top: 6px;
+  font-size: 12px;
 }
 
 .stamp {
   font-size: 18px;
-}
-
-button {
-  margin-top: 6px;
-  padding: 4px 8px;
+  margin-right: 2px;
 }
 
 .edit-mode {
   display: none;
+}
+
+button {
+  padding: 4px 8px;
+  font-size: 14px;
 }
 
 .month-highlight textarea {
@@ -112,8 +116,8 @@ button {
 </section>
 
 <section class="note">
-  ここは進捗を測る場所ではない。<br>
-  向きを思い出すための場所。
+  ここは進捗を管理する場所ではない。<br>
+  自分の向きを思い出すための場所。
 </section>
 
 <section>
@@ -127,12 +131,12 @@ button {
   <div id="monthlyHighlights"></div>
 </details>
 
-<!-- Firebase SDK -->
+<!-- Firebase -->
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
 
 <script>
-/* ================= Firebase ================= */
+/* ===== Firebase 初期化 ===== */
 const firebaseConfig = {
   apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
   authDomain: "me-manuel.firebaseapp.com",
@@ -149,7 +153,7 @@ const userId = "me-manuel-main-user";
 const goalRef = db.collection("users").doc(userId).collection("goals");
 const highlightRef = db.collection("users").doc(userId).collection("highlights");
 
-/* ================= 目標定義 ================= */
+/* ===== 目標定義 ===== */
 const goals = [
   { id:"beer", title:"1年間ビール禁止", group:"🍽 生活" },
   { id:"pasta", title:"1年間パスタ禁止", group:"🍽 生活" },
@@ -182,7 +186,7 @@ const goals = [
   { id:"friend", title:"趣味の友達", group:"🤝 人" }
 ];
 
-/* ================= 月間ハイライト ================= */
+/* ===== 月間ハイライト ===== */
 const mh = document.getElementById("monthlyHighlights");
 
 for (let m = 1; m <= 12; m++) {
@@ -210,15 +214,14 @@ mh.addEventListener("input", e => {
   });
 });
 
-/* ================= スタンプ ================= */
-function stampByState(state) {
-  if (state === "達成") return "🎉";
-  if (state === "一時停止") return "⛔️";
-  return "😆";
+/* ===== スタンプ ===== */
+function currentMonthKey() {
+  const now = new Date();
+  return `2026-${String(now.getMonth()+1).padStart(2,"0")}`;
 }
 
 function renderStamps(stamps = {}) {
-  let html = "";
+  let html = "<strong>2026年</strong><br>";
   for (let m = 1; m <= 12; m++) {
     const key = `2026-${String(m).padStart(2,"0")}`;
     html += `<span class="stamp">${stamps[key] || "▫️"}</span>`;
@@ -226,7 +229,7 @@ function renderStamps(stamps = {}) {
   return html;
 }
 
-/* ================= 目標カード ================= */
+/* ===== 目標カード ===== */
 let goalCache = {};
 const container = document.getElementById("goalContainer");
 
@@ -255,29 +258,48 @@ function renderGoals() {
 
     grouped[group].forEach(g => {
       const d = goalCache[g.id] || {};
+      const monthKey = currentMonthKey();
 
       const card = document.createElement("div");
       card.className = "goal-card";
 
       card.innerHTML = `
         <div class="view-mode">
-          <strong>${g.title}</strong>
-          <div class="meta">状態：${d.state || "未設定"}</div>
-          <div class="memo-preview">${(d.memo || "").slice(0,60)}</div>
-          <div class="stamp-row">
-            ${renderStamps(d.stamps)}
-            <button class="stamp-btn">今月</button>
+          <div class="card-header">
+            <div class="card-title">${g.title}</div>
+
+            <div class="stamp-picker">
+              <button data-stamp="😆">😆</button>
+              <button data-stamp="😐">😐</button>
+              <button data-stamp="🎉">🎉</button>
+            </div>
+
+            <button class="edit-btn">編集</button>
           </div>
-          <button class="edit-btn">編集</button>
+
+          <div class="meta">状態：${d.state || "未設定"}</div>
+          <div class="memo-preview">
+            ${(d.memo || "").length > 60
+              ? d.memo.slice(0,60) + "…"
+              : (d.memo || "")
+            }
+          </div>
+
+          <div class="stamp-log">
+            ${renderStamps(d.stamps)}
+          </div>
         </div>
 
         <div class="edit-mode">
+          <strong>${g.title}</strong>
+
           <select>
             <option ${d.state==="意識中"?"selected":""}>意識中</option>
             <option ${d.state==="進行中"?"selected":""}>進行中</option>
             <option ${d.state==="一時停止"?"selected":""}>一時停止</option>
             <option ${d.state==="達成"?"selected":""}>達成</option>
           </select>
+
           <textarea>${d.memo || ""}</textarea>
           <input type="date" value="${d.date || ""}">
           <button class="save-btn">保存</button>
@@ -288,7 +310,7 @@ function renderGoals() {
       const edit = card.querySelector(".edit-mode");
       const editBtn = card.querySelector(".edit-btn");
       const saveBtn = card.querySelector(".save-btn");
-      const stampBtn = card.querySelector(".stamp-btn");
+      const stampBtns = card.querySelectorAll(".stamp-picker button");
       const [sel, ta, dt] = edit.querySelectorAll("select, textarea, input");
 
       editBtn.onclick = () => {
@@ -306,18 +328,18 @@ function renderGoals() {
         });
       };
 
-      stampBtn.onclick = () => {
-        const now = new Date();
-        const key = `2026-${String(now.getMonth()+1).padStart(2,"0")}`;
-        const newStamps = {...(d.stamps || {})};
-        newStamps[key] = stampByState(d.state || "意識中");
+      stampBtns.forEach(btn => {
+        btn.onclick = () => {
+          const newStamps = {...(d.stamps || {})};
+          newStamps[monthKey] = btn.dataset.stamp;
 
-        goalRef.doc(g.id).set({
-          ...d,
-          stamps: newStamps,
-          updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      };
+          goalRef.doc(g.id).set({
+            ...d,
+            stamps: newStamps,
+            updatedAt: firebase.firestore.FieldValue.serverTimestamp()
+          });
+        };
+      });
 
       details.appendChild(card);
     });
