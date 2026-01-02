@@ -1,140 +1,278 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>🌅 Wake</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>🌅 Wake Up Log</title>
 
-<link rel="icon" href="icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+  <link rel="icon" href="icon.png">
+  <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 
-<style>
-body {
-  font-family: sans-serif;
-  background: #f7f7f7;
-  padding: 20px;
-  text-align: center;
-}
 
-nav {
-  margin-bottom: 20px;
-}
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #f0f6ff;
+      line-height: 1.6;
+    }
 
-nav a {
-  margin: 0 8px;
-}
+    nav a {
+      margin-right: 10px;
+    }
 
-.app-icon {
-  width: 96px;
-  height: 96px;
-  margin: 0 auto 12px;
-  border-radius: 20%;
-}
+    .wake-button {
+      font-size: 28px;
+      padding: 30px;
+      width: 100%;
+      border-radius: 16px;
+      border: none;
+      background: #4a90e2;
+      color: white;
+      cursor: pointer;
+      margin-bottom: 20px;
+    }
 
-#wakeBtn {
-  font-size: 20px;
-  padding: 14px 28px;
-  border-radius: 30px;
-  border: none;
-  background: #ffdf6c;
-  cursor: pointer;
-}
+    .box, .log {
+      background: white;
+      padding: 12px;
+      margin-bottom: 10px;
+      border-radius: 8px;
+    }
 
-#wakeBtn.disabled {
+    .wake-row {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      margin-top: 8px;
+    }
+
+    input[type="time"] {
+      font-size: 18px;
+    }
+
+    button.delete {
+      background: #d9534f;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      cursor: pointer;
+    }
+
+.wake-button.disabled {
   background: #ccc;
   color: #666;
+  box-shadow: none;
   cursor: default;
 }
-</style>
+
+.goal-link {
+  display: block;
+  background: #fff;
+  border-radius: 10px;
+  padding: 14px 16px;
+  margin-bottom: 16px;
+  text-decoration: none;
+  color: #333;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+}
+
+.goal-link-title {
+  font-weight: bold;
+  margin-bottom: 4px;
+}
+
+.goal-link-desc {
+  font-size: 14px;
+  color: #666;
+}
+
+
+  </style>
+
+  <!-- Firebase（Firestoreのみ） -->
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+
+  <script>
+    const firebaseConfig = {
+      apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
+      authDomain: "me-manuel.firebaseapp.com",
+      projectId: "me-manuel",
+      storageBucket: "me-manuel.firebasestorage.app",
+      messagingSenderId: "322422156686",
+      appId: "1:322422156686:web:0bd42d600451496d8e48df"
+    };
+
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.firestore();
+
+    /* 🔑 index.html と完全に同じ userId */
+    const userId = "me-manuel-main-user";
+  </script>
 </head>
 
 <body>
 
-<nav>
-  <a href="index.html">🏠 Home</a> |
+<nav style="margin-bottom:20px;">
   <a href="wake.html">🌅 Wake</a> |
+  <a href="index.html">📝 Log</a> |
   <a href="goals2026.html">🎯 2026</a>
 </nav>
 
-<img src="icon.png" alt="Me Manuel Icon" class="app-icon">
-
-<h1>🌅 Wake</h1>
+<h1>🌅 Wake Up Log</h1>
 <p id="today"></p>
 
-<button id="wakeBtn">🌅 起きた！</button>
+<button class="wake-button" id="wakeBtn">🌅 起きた！</button>
 
-<!-- Firebase -->
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
+<div class="box" id="averageTime"></div>
+<div class="box" id="monthlyAverage"></div>
+
+<h2>📜 起床の記録</h2>
+<div id="wakeList"></div>
 
 <script>
-/* ===== Firebase ===== */
-const firebaseConfig = {
-  apiKey: "AIzaSyD68jD_vsq_IwVupHsuHOMcLDO3JGJH-qU",
-  authDomain: "me-manuel.firebaseapp.com",
-  projectId: "me-manuel",
-  storageBucket: "me-manuel.firebasestorage.app",
-  messagingSenderId: "322422156686",
-  appId: "1:322422156686:web:0bd42d600451496d8e48df"
-};
-
-firebase.initializeApp(firebaseConfig);
-const db = firebase.firestore();
-
-/* 👤 固定ユーザーID */
-const userId = "me-manuel-main-user";
-
-/* 起床ステータス保存先 */
-const wakeStatusRef = db
-  .collection("users")
-  .doc(userId)
-  .collection("wake")
-  .doc("status");
-
-/* ===== 日付ユーティリティ ===== */
-function todayKey() {
+ function getTodayStr() {
   return new Date().toISOString().slice(0, 10);
 }
 
-/* ===== 表示 ===== */
-const today = new Date();
 document.getElementById("today").textContent =
-  "📅 " + today.toLocaleDateString();
+  "📅 " + new Date().toLocaleDateString();
 
-/* ===== ボタン制御 ===== */
-function updateWakeButton(lastWakeDate) {
-  const btn = document.getElementById("wakeBtn");
-  const today = todayKey();
 
-  if (lastWakeDate === today) {
-    btn.textContent = "✅ 記録した";
-    btn.classList.add("disabled");
-    btn.disabled = true;
-  } else {
-    btn.textContent = "🌅 起きた！";
-    btn.classList.remove("disabled");
-    btn.disabled = false;
-  }
+  const wakeRef = db
+    .collection("users")
+    .doc(userId)
+    .collection("wakeLogs");
+
+  let wakeCache = [];
+
+  const wakeBtn = document.getElementById("wakeBtn");
+
+  /* 🌅 起床ログ追加（1日1回制限） */
+  async function logWake() {
+  if (hasWokenToday()) return;
+
+  const now = new Date();
+  await wakeRef.add({
+    date: getTodayStr(),
+    time: now.toTimeString().slice(0, 5),
+    createdAt: now.toISOString()
+  });
 }
 
-/* ===== Firestore 監視（超重要） ===== */
-wakeStatusRef.onSnapshot(doc => {
-  const data = doc.data();
-  updateWakeButton(data?.wakeDate);
-});
 
-/* ===== 起床ボタン押下 ===== */
-document.getElementById("wakeBtn").onclick = async () => {
-  const today = todayKey();
+  wakeBtn.addEventListener("click", logWake);
 
-  await wakeStatusRef.set({
-    wakeDate: today,
-    updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-  });
+  /* 🔄 リアルタイム同期 */
+  function startRealtimeWakeLogs() {
+    wakeRef
+      .orderBy("date")
+      .onSnapshot(snapshot => {
+        wakeCache = snapshot.docs.map(doc => ({
+          id: doc.id,
+          ...doc.data()
+        }));
+        renderWakeLogs();
+        updateWakeButtonState();
+      });
+  }
 
-  updateWakeButton(today);
-};
+  /* ✅ 今日すでに起きているか */
+function hasWokenToday() {
+  const today = getTodayStr();
+  return wakeCache.some(e => e.date === today);
+}
+
+
+  /* 🎛 ボタン状態制御 */
+  function updateWakeButtonState() {
+    if (hasWokenToday()) {
+      wakeBtn.textContent = "✅ 記録した";
+      wakeBtn.classList.add("disabled");
+      wakeBtn.disabled = true;
+    } else {
+      wakeBtn.textContent = "🌅 起きた！";
+      wakeBtn.classList.remove("disabled");
+      wakeBtn.disabled = false;
+    }
+  }
+
+  /* 🖼 描画 */
+  function renderWakeLogs() {
+    const list = document.getElementById("wakeList");
+    list.innerHTML = "";
+
+    if (wakeCache.length === 0) {
+      list.textContent = "まだ起床ログはありません。";
+      return;
+    }
+
+    renderAverage(wakeCache);
+    renderMonthlyAverage(wakeCache);
+
+    wakeCache.slice().reverse().forEach(e => {
+      const div = document.createElement("div");
+      div.className = "log";
+      div.innerHTML = `
+        <strong>${e.date}</strong>
+        <div class="wake-row">
+          <input type="time" value="${e.time}"
+            onchange="updateTime('${e.id}', this.value)">
+          <button class="delete"
+            onclick="deleteWake('${e.id}')">削除</button>
+        </div>
+      `;
+      list.appendChild(div);
+    });
+  }
+
+  /* ✏️ 更新 */
+  async function updateTime(id, newTime) {
+    await wakeRef.doc(id).update({ time: newTime });
+  }
+
+  /* 🗑 削除 */
+  async function deleteWake(id) {
+    if (!confirm("この起床ログを削除しますか？")) return;
+    await wakeRef.doc(id).delete();
+  }
+
+  /* ⏱ 計算 */
+  function timeToMinutes(t) {
+    const [h, m] = t.split(":").map(Number);
+    return h * 60 + m;
+  }
+
+  function renderAverage(data) {
+    const avg =
+      Math.round(
+        data.reduce((s, e) => s + timeToMinutes(e.time), 0) / data.length
+      );
+
+    document.getElementById("averageTime").textContent =
+      `📊 平均起床：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
+  }
+
+  function renderMonthlyAverage(data) {
+    const month = todayStr.slice(0, 7);
+    const m = data.filter(e => e.date.startsWith(month));
+    if (m.length === 0) return;
+
+    const avg =
+      Math.round(
+        m.reduce((s, e) => s + timeToMinutes(e.time), 0) / m.length
+      );
+
+    document.getElementById("monthlyAverage").textContent =
+      `📈 今月の平均：${String(Math.floor(avg / 60)).padStart(2, "0")}:${String(avg % 60).padStart(2, "0")}`;
+  }
+
+  /* 🔥 初期化 */
+  startRealtimeWakeLogs();
 </script>
+
 
 </body>
 </html>
